@@ -26,13 +26,17 @@ const products = [
     name: "RomBuzz",
     badge: "Flagship Product",
     description:
-      "<www className=\"rombuzz.com\"></www>A modern social and dating product under the Neptrixx ecosystem, built with product depth and long-term growth in mind.",
+      "A modern social and dating product under the Neptrixx ecosystem, built with product depth and long-term growth in mind.",
+    url: "https://www.rombuzz.com",
+    logo: "/rombuzz-logo.png",
   },
   {
     name: "Future Software Suite",
     badge: "In Progress",
     description:
       "Neptrixx is designed as a parent brand that can continuously launch new software products under one trusted umbrella.",
+    url: "",
+    logo: "",
   },
 ];
 
@@ -220,7 +224,7 @@ function App() {
           </div>
         </section>
 
-        <section className="section alt" id="products">
+          <section className="section alt" id="products">
           <div className="section-heading">
             <p className="eyebrow">Products</p>
             <h2>Software products under the Neptrixx brand</h2>
@@ -234,7 +238,38 @@ function App() {
             {products.map((product) => (
               <article className="product-card" key={product.name}>
                 <span className="product-badge">{product.badge}</span>
-                <h3>{product.name}</h3>
+
+                {product.logo ? (
+                  <a
+                    href={product.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="product-logo-link"
+                    aria-label={`Open ${product.name}`}
+                  >
+                    <img
+                      src={product.logo}
+                      alt={`${product.name} logo`}
+                      className="product-logo"
+                    />
+                  </a>
+                ) : null}
+
+                {product.url ? (
+                  <h3>
+                    <a
+                      href={product.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="product-link"
+                    >
+                      {product.name}
+                    </a>
+                  </h3>
+                ) : (
+                  <h3>{product.name}</h3>
+                )}
+
                 <p>{product.description}</p>
               </article>
             ))}
