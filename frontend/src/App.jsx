@@ -224,7 +224,7 @@ function App() {
           </div>
         </section>
 
-          <section className="section alt" id="products">
+                 <section className="section alt" id="products">
           <div className="section-heading">
             <p className="eyebrow">Products</p>
             <h2>Software products under the Neptrixx brand</h2>
@@ -239,22 +239,6 @@ function App() {
               <article className="product-card" key={product.name}>
                 <span className="product-badge">{product.badge}</span>
 
-                {product.logo ? (
-                  <a
-                    href={product.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="product-logo-link"
-                    aria-label={`Open ${product.name}`}
-                  >
-                    <img
-                      src={product.logo}
-                      alt={`${product.name} logo`}
-                      className="product-logo"
-                    />
-                  </a>
-                ) : null}
-
                 {product.url ? (
                   <h3>
                     <a
@@ -262,8 +246,28 @@ function App() {
                       target="_blank"
                       rel="noreferrer"
                       className="product-link"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        textDecoration: "none",
+                        color: "inherit",
+                      }}
                     >
-                      {product.name}
+                      {product.logo ? (
+                        <img
+                          src={product.logo}
+                          alt={`${product.name} logo`}
+                          style={{
+                            width: "28px",
+                            height: "28px",
+                            objectFit: "contain",
+                            borderRadius: "8px",
+                            display: "block",
+                          }}
+                        />
+                      ) : null}
+                      <span>{product.name}</span>
                     </a>
                   </h3>
                 ) : (
