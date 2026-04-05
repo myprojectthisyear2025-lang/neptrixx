@@ -26,15 +26,23 @@ const products = [
     name: "RomBuzz",
     badge: "Flagship Product",
     description:
-      "A modern social and dating product under the Neptrixx ecosystem, built with product depth and long-term growth in mind.",
+      "A modern social and dating product under the Neptrixx ecosystem, built with product depth and long-term growth in mind. Real-time matching, chat, and community features.",
     url: "https://www.rombuzz.com",
     logo: "/rombuzz-logo.png",
   },
   {
-    name: "Future Software Suite",
+    name: "Neptrixx Suite",
     badge: "In Progress",
     description:
-      "Neptrixx is designed as a parent brand that can continuously launch new software products under one trusted umbrella.",
+      "Future software ecosystem: AI productivity tools, workflow automation, and next-gen business OS launching soon.",
+    url: "",
+    logo: "",
+  },
+  {
+    name: "Analytixx",
+    badge: "Coming Soon",
+    description:
+      "Smart analytics dashboard for e-commerce and product teams. Built to help brands scale with data-driven decisions.",
     url: "",
     logo: "",
   },
@@ -48,9 +56,9 @@ const processSteps = [
 ];
 
 const stats = [
-  { value: "01", label: "Parent company for products" },
-  { value: "02", label: "Client service lines" },
-  { value: "∞", label: "Scalable software possibilities" },
+  { value: "03+", label: "Active Products" },
+  { value: "∞", label: "Scalable Possibilities" },
+  { value: "100%", label: "Client Delivery" },
 ];
 
 function App() {
@@ -94,7 +102,7 @@ function App() {
 
       setResult({
         type: "success",
-        text: "Your project inquiry was sent successfully.",
+        text: "✨ Your project inquiry was sent successfully! We'll reach out within 24h.",
       });
 
       setForm({
@@ -109,7 +117,7 @@ function App() {
     } catch (error) {
       setResult({
         type: "error",
-        text: error.message || "Something went wrong.",
+        text: error.message || "Something went wrong. Please try again.",
       });
     } finally {
       setSubmitting(false);
@@ -120,7 +128,13 @@ function App() {
     <div className="site-shell">
       <header className="topbar">
         <a href="#hero" className="brand">
-          <span className="brand-mark">N</span>
+          <span className="brand-mark">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+            </svg>
+          </span>
           <span className="brand-text">Neptrixx</span>
         </a>
 
@@ -137,14 +151,14 @@ function App() {
       <main>
         <section className="hero" id="hero">
           <div className="hero-copy">
-            <p className="eyebrow">Parent Company • Product Studio • Client Solutions</p>
+            <p className="eyebrow">✦ Parent Company • Product Studio • Client Solutions</p>
             <h1>
               Building software products under one bold, clean, scalable brand.
             </h1>
             <p className="hero-text">
               Neptrixx is the parent company behind products like <strong>RomBuzz</strong>
               , while also delivering websites, mobile apps, software platforms,
-              and custom systems for clients.
+              and custom systems for clients worldwide.
             </p>
 
             <div className="hero-actions">
@@ -152,7 +166,7 @@ function App() {
                 Launch with Neptrixx
               </a>
               <a href="#products" className="button secondary">
-                Explore Products
+                Explore Products →
               </a>
             </div>
 
@@ -180,7 +194,7 @@ function App() {
               <div className="panel-card">
                 <span className="mini-label">Product</span>
                 <h4>RomBuzz</h4>
-                <p>Part of the Neptrixx ecosystem.</p>
+                <p>Real‑time dating & social ecosystem.</p>
               </div>
 
               <div className="panel-card">
@@ -224,7 +238,7 @@ function App() {
           </div>
         </section>
 
-                 <section className="section alt" id="products">
+        <section className="section alt" id="products">
           <div className="section-heading">
             <p className="eyebrow">Products</p>
             <h2>Software products under the Neptrixx brand</h2>
@@ -239,6 +253,26 @@ function App() {
               <article className="product-card" key={product.name}>
                 <span className="product-badge">{product.badge}</span>
 
+                {product.logo ? (
+                  <a
+                    href={product.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="product-logo-link"
+                    aria-label={`Open ${product.name}`}
+                  >
+                    <img
+                      src={product.logo}
+                      alt={`${product.name} logo`}
+                      className="product-logo"
+                    />
+                  </a>
+                ) : (
+                  <div className="product-icon-placeholder">
+                    {product.name === "RomBuzz" ? "R" : product.name === "Neptrixx Suite" ? "⚡" : "📈"}
+                  </div>
+                )}
+
                 {product.url ? (
                   <h3>
                     <a
@@ -246,28 +280,8 @@ function App() {
                       target="_blank"
                       rel="noreferrer"
                       className="product-link"
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        textDecoration: "none",
-                        color: "inherit",
-                      }}
                     >
-                      {product.logo ? (
-                        <img
-                          src={product.logo}
-                          alt={`${product.name} logo`}
-                          style={{
-                            width: "28px",
-                            height: "28px",
-                            objectFit: "contain",
-                            borderRadius: "8px",
-                            display: "block",
-                          }}
-                        />
-                      ) : null}
-                      <span>{product.name}</span>
+                      {product.name}
                     </a>
                   </h3>
                 ) : (
@@ -340,13 +354,16 @@ function App() {
                   It gives you a strong public-facing company site now, without forcing
                   you to build your full enterprise stack on day one.
                 </p>
+                <p style={{ marginTop: "12px" }}>
+                  📧 <strong>hello@neptrixx.com</strong> — We reply within 24h.
+                </p>
               </div>
             </div>
 
             <form className="contact-form" onSubmit={handleSubmit}>
               <div className="field-grid">
                 <label>
-                  <span>Name</span>
+                  <span>Name *</span>
                   <input
                     value={form.name}
                     onChange={(e) => updateField("name", e.target.value)}
@@ -356,7 +373,7 @@ function App() {
                 </label>
 
                 <label>
-                  <span>Email</span>
+                  <span>Email *</span>
                   <input
                     type="email"
                     value={form.email}
@@ -414,7 +431,7 @@ function App() {
               </div>
 
               <label>
-                <span>Project details</span>
+                <span>Project details *</span>
                 <textarea
                   value={form.message}
                   onChange={(e) => updateField("message", e.target.value)}
@@ -425,7 +442,7 @@ function App() {
               </label>
 
               <button className="button primary submit" disabled={submitting}>
-                {submitting ? "Sending..." : "Send Inquiry"}
+                {submitting ? "Sending..." : "Send Inquiry →"}
               </button>
 
               {result.text ? (
