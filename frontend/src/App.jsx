@@ -26,7 +26,7 @@ const products = [
     name: "RomBuzz",
     badge: "Flagship Product",
     description:
-      "A modern social and dating product under the Neptrixx ecosystem, built with product depth and long-term growth in mind.",
+      "<www className=\"rombuzz.com\"></www>A modern social and dating product under the Neptrixx ecosystem, built with product depth and long-term growth in mind.",
   },
   {
     name: "Future Software Suite",
