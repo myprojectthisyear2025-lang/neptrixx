@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Yumi Beads</title>
+  <desc id="desc">Yumi Beads product mark</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff6f8"/>
+      <stop offset="1" stop-color="#ffe6ef"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff6f9d"/>
+      <stop offset="0.55" stop-color="#ff9a6a"/>
+      <stop offset="1" stop-color="#9b7cff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="132" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="148" fill="none" stroke="url(#ring)" stroke-width="30" stroke-linecap="round" stroke-dasharray="24 22"/>
+  <circle cx="152" cy="146" r="25" fill="#ff759f"/>
+  <circle cx="360" cy="154" r="20" fill="#ffad70"/>
+  <circle cx="372" cy="348" r="23" fill="#9b7cff"/>
+  <circle cx="140" cy="354" r="19" fill="#ff89b1"/>
+  <text x="256" y="285" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="118" font-weight="800" letter-spacing="-12" fill="#71364f">YB</text>
+</svg>

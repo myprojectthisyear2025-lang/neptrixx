@@ -1,0 +1,9 @@
+{
+  "name": "Neptrixx",
+  "short_name": "Neptrixx",
+  "description": "Global software and product development company building websites, apps, AI solutions, custom software, and digital platforms.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f8fc",
+  "theme_color": "#fff8f0"
+}
