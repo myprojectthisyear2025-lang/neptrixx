@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { rateLimit } from 'express-rate-limit';
+import { ensureSnapshot } from './registration.js';
 import { User } from './models.js';
 import { issueCode, consumeCode } from './codes.js';
 import { emailOf, validEmail, fail, wrap } from './errors.js';
@@ -21,6 +22,7 @@ emailChange.post('/profile/email/confirm', wrap(async (req, res) => {
   const email = emailOf(req.body.email); validEmail(email);
   const pending = await consumeCode(email, 'email', req.body.code);
   if (pending.userId !== String(req.user._id)) fail(403, 'This verification does not belong to your account.');
+  await ensureSnapshot(req.user._id);
   req.user.email = email; req.user.emailVerifiedAt = new Date(); req.user.sessionVersion += 1; await req.user.save();
   req.app.get('io').in(`user:${req.user._id}`).disconnectSockets(true);
   await establish(req, req.user); res.json({ user: await publicUser(req.user), csrf: csrfToken(req) });

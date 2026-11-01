@@ -1,18 +1,22 @@
 /** Database-filtered and paginated inbox with private pin/mute/history preferences. */
 import mongoose from 'mongoose';
-import { Conversation, Message, Preference } from './models.js';
+import { Conversation, Message, Preference, User } from './models.js';
 import { fail } from './errors.js';
 export async function inboxRecords(user, options) {
   const userId = user._id;
   const stages = [
     { $match: user.role === 'admin' ? {} : { customerId: userId } },
+    { $lookup: { from: User.collection.name, let: { uid: '$customerId' }, pipeline: [
+      { $match: { role: 'customer', $expr: { $eq: ['$_id', '$$uid'] } } }, { $project: { _id: 1, blocked: 1 } },
+    ], as: 'customerRecord' } },
+    { $match: { 'customerRecord.0': { $exists: true } } },
     { $lookup: { from: Preference.collection.name, let: { cid: '$_id' }, pipeline: [
       { $match: { $expr: { $and: [{ $eq: ['$conversationId', '$$cid'] }, { $eq: ['$userId', userId] }] } } },
     ], as: 'preferences' } },
     { $set: { preference: { $arrayElemAt: ['$preferences', 0] } } },
     { $set: { pinTime: { $cond: [{ $ifNull: ['$preference.pinnedAt', false] }, new Date(1), new Date(0)] },
       cutoff: { $ifNull: ['$preference.hiddenAt', new Date(0)] } } },
-    { $match: { $expr: { $or: [{ $eq: ['$cutoff', new Date(0)] }, { $gt: ['$lastMessageAt', '$cutoff'] }] } } },
+    ...(options.filter === 'blocked' ? [] : [{ $match: { $expr: { $or: [{ $eq: ['$cutoff', new Date(0)] }, { $gt: ['$lastMessageAt', '$cutoff'] }] } } }]),
     { $lookup: { from: Message.collection.name, let: { cid: '$_id',
       read: user.role === 'admin' ? '$adminReadAt' : '$customerReadAt', cutoff: '$cutoff' }, pipeline: [
       { $match: { senderRole: user.role === 'admin' ? 'customer' : 'admin', hiddenFor: { $ne: userId }, deletedForAllAt: null,
@@ -21,7 +25,10 @@ export async function inboxRecords(user, options) {
     ], as: 'unreadRows' } },
     { $set: { unread: { $ifNull: [{ $arrayElemAt: ['$unreadRows.count', 0] }, 0] } } },
   ];
-  if (options.filter === 'unread') stages.push({ $match: { unread: { $gt: 0 } } });
+  if (options.filter === 'muted') stages.push({ $match: { 'preference.muted': true } });
+  else if (options.filter === 'pinned') stages.push({ $match: { pinTime: { $gt: new Date(0) } } });
+  else if (options.filter === 'blocked') stages.push({ $match: { 'customerRecord.blocked': true } });
+  else if (options.filter === 'unread') stages.push({ $match: { unread: { $gt: 0 } } });
   else if (['open', 'resolved'].includes(options.filter)) stages.push({ $match: { status: options.filter } });
   else if (options.filter && options.filter !== 'all') fail(400, 'Invalid inbox filter.');
   if (options.before) {

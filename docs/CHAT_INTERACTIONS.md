@@ -15,7 +15,7 @@ This revision builds on Neptrixx main commit `15a2b19` and uses only this projec
 - Delete for me hides that message only from the current user, including on reload.
 - Admin inbox shows newest activity first, with pinned chats above unpinned chats; each group sorts by recent activity.
 - Same-day messages show a clock time; older messages show a date and a full timestamp on hover.
-- All/unread/open/resolved filtering happens before pagination, including older unread conversations.
+- All/unread/muted/blocked/pinned filtering happens before pagination, including older unread conversations.
 - Hold an inbox row or use its menu to pin, mute, block, or delete chat for me.
 - Pin/mute/delete belong to the signed-in admin. Blocking applies to the customer account and ends its sessions.
 - Delete chat for me hides current history only for that admin; a later message brings the chat back.
@@ -46,3 +46,5 @@ Real-device checks remain necessary after deployment: Brave push service setting
 notification arrival with the phone locked, browser-native sound behavior, real R2 deletion, and two-way
 presence/actions between separate authenticated devices. An offline or force-stopped device, blocked push service,
 Focus/Do Not Disturb, browser suspension, and Render free-instance sleep can prevent or delay alerts.
+
+Profile-photo signup and private record behavior are documented in `REGISTRATION_RECORDS.md`.

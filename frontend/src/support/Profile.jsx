@@ -9,7 +9,7 @@ import Avatar from './Avatar';
 import Modal from './Modal';
 import EmailChange from './EmailChange';
 export default function Profile({ onClose }) {
-  const { user, setUser, logout } = useSupport(); const [name, setName] = useState(user.name);
+  const { user, setUser, logout, notificationStatus, checkNotifications } = useSupport(); const [name, setName] = useState(user.name);
   const [phone, setPhone] = useState(user.phone); const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [notice, setNotice] = useState('');
   const [deleting, setDeleting] = useState(false); const [password, setPassword] = useState('');
@@ -25,7 +25,7 @@ export default function Profile({ onClose }) {
     setBusy(true); setError(''); setNotice('');
     try {
       if (enable) await enableNotifications(); else { await disableNotifications(); await request('/profile', { method: 'PATCH', body: { pushEnabled: false } }); }
-      setUser(u => ({ ...u, pushEnabled: enable })); setNotice(enable ? 'Notifications enabled on this device.' : 'Message notifications disabled for this account.');
+      setUser(u => ({ ...u, pushEnabled: enable })); await checkNotifications(); setNotice(enable ? 'Notifications enabled on this device.' : 'Message notifications disabled for this account.');
     } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
   async function removeAvatar() {
@@ -50,7 +50,7 @@ export default function Profile({ onClose }) {
     </form>
     <div className="sp-settings-section"><EmailChange onDone={setUser} /></div>
     <div className="sp-settings-section"><h3>Message notifications</h3><p className="sp-muted">Enable on each device you use. Your browser and phone settings control alerts.</p>
-      <div className="sp-button-row"><button disabled={busy} onClick={() => notifications(true)}>Enable on this device</button><button disabled={busy} onClick={() => notifications(false)}>Disable notifications</button></div>
+      <div className="sp-button-row">{notificationStatus === 'enabled' ? <span className="sp-notice" role="status">Enabled on this device</span> : <button disabled={busy || notificationStatus === 'checking'} onClick={() => notifications(true)}>Enable on this device</button>}<button disabled={busy} onClick={() => notifications(false)}>Disable notifications</button></div>
     </div>
     <MessageSoundSettings />
     {error && <p className="sp-error" role="alert">{error}</p>}{notice && <p className="sp-notice" role="status">{notice}</p>}

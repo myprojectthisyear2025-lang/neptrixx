@@ -36,8 +36,8 @@ export default function Inbox({ selected, onSelect }) {
     <div className="sp-inbox-head"><h1>Messages</h1><p className="sp-muted">Your customer conversations</p>
       <label className="sp-search"><span className="sp-sr-only">Search customers</span><input type="search" value={query} placeholder="Search name, email, phone, ID"
         onChange={e => setQuery(e.target.value)} /></label>
-      {!query.trim() && <div className="sp-filters">{['all', 'unread', 'open', 'resolved'].map(value => <button key={value}
-        className={inboxFilter === value ? 'is-active' : ''} onClick={() => setInboxFilter(value)}>{value[0].toUpperCase() + value.slice(1)}</button>)}</div>}
+      {!query.trim() && <div className="sp-filters">{['all', 'unread', 'muted', 'blocked', 'pinned'].map(value => <button key={value}
+        className={inboxFilter === value ? 'is-active' : ''} onClick={() => setInboxFilter(value)}>{value === 'blocked' ? 'Blocked users' : value[0].toUpperCase() + value.slice(1)}</button>)}</div>}
     </div>
     {error && <p className="sp-error" role="alert">{error}</p>}
     <div className="sp-inbox-list">

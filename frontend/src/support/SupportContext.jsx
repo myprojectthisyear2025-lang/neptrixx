@@ -2,6 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { disableNotifications } from './notifications';
+import { useNotificationStatus } from './useNotificationStatus';
 import { useMessageSound } from './useMessageSound';
 import { API_BASE, currentCsrf, request, session } from './api';
 const Context = createContext(null);
@@ -13,6 +14,7 @@ export default function SupportProvider({ children }) {
   const [inboxFilter, setInboxFilter] = useState('all'); const [supportPresence, setSupportPresence] = useState(null);
   const [customerPresence, setCustomerPresence] = useState({}); const [socket, setSocket] = useState(null);
   const socketRef = useRef(null); const refreshTimer = useRef(null); const muted = useRef(new Set());
+  const notifications = useNotificationStatus(user);
   const sound = useMessageSound(); const soundRef = useRef(sound); soundRef.current = sound;
   const filterRef = useRef(inboxFilter); filterRef.current = inboxFilter;
   const refresh = useCallback(async (append = false, cursor = null) => {
@@ -44,7 +46,7 @@ export default function SupportProvider({ children }) {
         if (message.senderId !== user.id && !muted.current.has(message.conversationId)) soundRef.current.playMessageTone();
       } schedule();
     });
-    ['chat:read', 'chat:conversation', 'chat:updated', 'chat:hidden', 'chat:preference'].forEach(event => live.on(event, schedule));
+    ['chat:customer', 'chat:read', 'chat:conversation', 'chat:updated', 'chat:hidden', 'chat:preference'].forEach(event => live.on(event, schedule));
     live.on('chat:presence', person => {
       if (person.role === 'admin') setSupportPresence(person);
       else {
@@ -64,5 +66,5 @@ export default function SupportProvider({ children }) {
   }
   const unread = conversations.reduce((total, c) => total + c.unread, 0);
   return <Context.Provider value={{ user, setUser, loading, error, setError, connected, socketRef, socket,
-    conversations, refresh, nextInbox, unread, logout, inboxFilter, setInboxFilter, supportPresence, customerPresence, ...sound }}>{children}</Context.Provider>;
+    conversations, refresh, nextInbox, unread, logout, inboxFilter, setInboxFilter, supportPresence, customerPresence, ...notifications, ...sound }}>{children}</Context.Provider>;
 }

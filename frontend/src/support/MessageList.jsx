@@ -1,4 +1,5 @@
 /** Quiet sender/receiver bubbles, date groups, photo viewer links, replies, and read receipts. */
+import CustomerCard from './CustomerCard';
 import MessageBubble from './MessageBubble';
 import MessageActions from './MessageActions';
 import { useEffect, useRef, useState } from 'react';
@@ -13,12 +14,13 @@ export default function MessageList({ thread, user, conversation, onReply, onPho
   const otherRead = user.role === 'admin' ? conversation.customerReadAt : conversation.adminReadAt;
   return <div className="sp-message-list" ref={scroll} role="log" aria-label="Conversation messages" aria-live="polite"
     onScroll={() => { const el = scroll.current; bottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 100; }}>
+    {user.role === 'admin' && thread.profileCard && <CustomerCard card={thread.profileCard} />}
     {thread.hasMore && <button className="sp-history" disabled={thread.loading} onClick={async () => {
       const box = scroll.current; const before = box.scrollHeight; const top = box.scrollTop;
       await thread.load(true); requestAnimationFrame(() => { box.scrollTop = top + box.scrollHeight - before; });
     }}>Load earlier messages</button>}
     {thread.loading && !thread.messages.length && <p className="sp-empty">Loading your conversation…</p>}
-    {!thread.loading && !thread.messages.length && <div className="sp-welcome"><span><img src="/neptrixx-mark.svg" alt="" /></span><h2>Let’s talk</h2><p>Send a message or photo.<br />Our team will reply here.</p></div>}
+    {!thread.loading && !thread.messages.length && !thread.profileCard && <div className="sp-welcome"><span><img src="/neptrixx-mark.svg" alt="" /></span><h2>Let’s talk</h2><p>Send a message or photo.<br />Our team will reply here.</p></div>}
     {thread.messages.map((message, index) => {
       const date = new Date(message.createdAt);
       const prior = thread.messages[index - 1]; const newDay = !prior || new Date(prior.createdAt).toDateString() !== date.toDateString();

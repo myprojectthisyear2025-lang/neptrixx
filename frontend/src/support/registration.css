@@ -1,0 +1,14 @@
+/* Quiet signup-photo and private customer-record layout for light and dark themes. */
+.sp-signup-photo { display:flex; gap:14px; align-items:center; }.sp-signup-photo label { min-width:0; flex:1; }
+.sp-signup-photo img { width:64px; height:64px; object-fit:cover; border-radius:12px; flex:none; }
+.sp-customer-card { max-width:520px; margin:12px auto 28px; padding:20px; border:1px solid var(--sp-border); border-radius:16px; background:var(--sp-surface); }
+.sp-card-heading { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:16px; font-size:11px; }
+.sp-card-heading > span { padding:4px 8px; border-radius:999px; background:var(--sp-raised); font-weight:600; }
+.sp-card-heading > small { color:var(--sp-muted); }
+.sp-card-profile { display:flex; gap:14px; align-items:center; margin-bottom:16px; }.sp-card-profile > div { min-width:0; }
+.sp-card-profile img, .sp-card-photo-missing { width:68px; height:68px; flex:none; object-fit:cover; border-radius:12px; }
+.sp-card-photo-missing { display:grid; place-items:center; padding:5px; font-size:10px; color:var(--sp-muted); background:var(--sp-raised); text-align:center; }
+.sp-card-profile h3 { font-size:16px; overflow-wrap:anywhere; }.sp-card-profile p { font-size:10px; overflow-wrap:anywhere; }
+.sp-customer-card dl { display:grid; gap:10px; margin-bottom:16px; }.sp-customer-card dl > div { display:grid; grid-template-columns:58px minmax(0,1fr); gap:8px; }
+.sp-customer-card dt { font-size:12px; color:var(--sp-muted); }.sp-customer-card dd { margin:0; font-size:13px; overflow-wrap:anywhere; }
+.sp-customer-card > p { font-size:11px; line-height:1.6; }.sp-filters { flex-wrap:wrap; }

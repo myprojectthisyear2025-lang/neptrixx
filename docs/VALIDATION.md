@@ -9,7 +9,7 @@ Recorded for this source package on November 1, 2026. These checks do not imply 
 - Production frontend build with Vite 8.3.5.
 - Backend production dependency audit: zero reported vulnerabilities.
 - Frontend dependency audit: zero reported vulnerabilities.
-- Twenty-eight backend tests using an isolated real MongoDB replica set, HTTP requests, and Socket.IO clients.
+- Forty-nine backend tests using an isolated real MongoDB replica set, HTTP requests, and Socket.IO clients.
 - Browser checks against the production bundle with explicitly mocked API responses, at desktop and phone widths.
 - Optional-mode browser checks: company homepage stays usable, no chat/auth/socket bundle starts while off,
   direct message URLs are unavailable, and runtime enable/disable takes effect without rebuilding.
@@ -80,6 +80,12 @@ The emblem SVG and favicon embed those original bytes and use a viewport to show
 the emblem at small sizes; no AI recreation is used. Website, footer, support header,
 and social metadata use the new artwork.
 
-The conversation-interaction extension passes 39 backend tests in total and production-bundle browser
+The conversation-interaction extension passes 49 backend tests in total and production-bundle browser
 checks for mobile holds, message/photo actions, inbox preferences, push recovery, sound controls,
 and continued feature-off behavior. See `CHAT_INTERACTIONS.md` for deployment/device test boundaries.
+
+Registration/device-state checks cover missing/invalid/oversized photos, verified-only account creation,
+photo-preserving code resend, immutable admin records, current-profile/email changes, legacy capture labels,
+retained-media cleanup protection, requested inbox categories, and the existing account deletion boundary.
+Browser checks verify no enable prompt on an already subscribed device across reload, permission-change
+refresh without permission prompts, required photo/preview, admin-only card rendering, and mobile categories.
