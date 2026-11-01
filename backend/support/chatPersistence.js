@@ -1,12 +1,14 @@
 /** Atomic support-message persistence: deduplication, photo ownership, inbox update, and push outbox. */
 import mongoose from 'mongoose';
 import { Asset, Conversation, Message, PushJob } from './models.js';
+import { historyCutoff } from './inbox.js';
 import { fail, objectId, text } from './errors.js';
 export async function persistMessage(conversation, user, input) {
   const body = text(input.text); const imageKey = text(input.imageKey, 300);
   const replyTo = input.replyTo ? objectId(input.replyTo) : null;
   if (!body && !imageKey) fail(400, 'Write a message or attach a photo.');
   if (typeof input.text === 'string' && input.text.length > 4000) fail(400, 'Keep messages under 4,000 characters.');
+  const cutoff = replyTo ? await historyCutoff(conversation, user) : null;
   const dbSession = await mongoose.startSession(); let message; let inserted = false;
   try {
     await dbSession.withTransaction(async () => {
@@ -19,7 +21,7 @@ export async function persistMessage(conversation, user, input) {
         }
         return;
       }
-      if (replyTo && !await Message.exists({ _id: replyTo, conversationId: conversation._id }).session(dbSession)) {
+      if (replyTo && !await Message.exists({ _id: replyTo, conversationId: conversation._id, deletedForAllAt: null, hiddenFor: { $ne: user._id }, createdAt: { $gt: cutoff } }).session(dbSession)) {
         fail(400, 'Reply message not found.');
       }
       const id = new mongoose.Types.ObjectId();

@@ -79,3 +79,7 @@ The supplied Neptrixx artwork is preserved as `frontend/public/neptrixx-brand.jp
 The emblem SVG and favicon embed those original bytes and use a viewport to show
 the emblem at small sizes; no AI recreation is used. Website, footer, support header,
 and social metadata use the new artwork.
+
+The conversation-interaction extension passes 39 backend tests in total and production-bundle browser
+checks for mobile holds, message/photo actions, inbox preferences, push recovery, sound controls,
+and continued feature-off behavior. See `CHAT_INTERACTIONS.md` for deployment/device test boundaries.

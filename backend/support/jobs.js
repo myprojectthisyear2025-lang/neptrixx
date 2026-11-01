@@ -1,5 +1,5 @@
 /** Mongo-backed push retries and cleanup of abandoned uploads; call from one Render service. */
-import { PushJob, Subscription, User, Conversation, Message, Asset } from './models.js';
+import { PushJob, Subscription, User, Conversation, Message, Asset, Preference } from './models.js';
 import { deliver } from './push.js';
 import { removePhoto } from './storage.js';
 let busy = false;
@@ -14,12 +14,14 @@ export async function processJobs() {
       try {
         const c = await Conversation.findById(job.conversationId);
         const message = await Message.findById(job.messageId);
-        if (c && message) {
+        if (c && message && !message.deletedForAllAt) {
           const recipients = await User.find({ ...(job.senderRole === 'admin' ? { _id: c.customerId } : { role: 'admin' }),
             blocked: false, pushEnabled: true }).select('_id');
           const readAt = job.senderRole === 'admin' ? c.customerReadAt : c.adminReadAt;
           if (message.createdAt > readAt && Date.now() - message.createdAt.getTime() < 3600000) {
-            const subscriptions = await Subscription.find({ userId: { $in: recipients.map(u => u._id) } });
+            const muted = await Preference.find({ conversationId: c._id, $or: [{ muted: true },
+              { hiddenAt: { $gte: message.createdAt } }] }).select('userId');
+            const subscriptions = await Subscription.find({ userId: { $in: recipients.map(u => u._id), $nin: [...muted.map(p => p.userId), ...(message.hiddenFor || [])] } });
             const results = await Promise.allSettled(subscriptions.map(s => deliver(s, {
               title: 'Neptrixx', body: 'You have a new message.', tag: `chat-${c._id}`,
               path: `${job.senderRole === 'admin' ? '/messages' : '/admin/messages'}?conversation=${c._id}`,

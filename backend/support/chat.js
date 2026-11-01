@@ -2,7 +2,9 @@
 import { Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { rateLimit } from 'express-rate-limit';
-import { Conversation, Message, User } from './models.js';
+import { loadHistory } from './history.js';
+import { inboxRecords, preferenceFor, historyCutoff } from './inbox.js';
+import { Conversation, Message, User, Preference } from './models.js';
 import { authorizeConversation, ensureConversation, requireActiveCustomer } from './permissions.js';
 import { photoUrl } from './storage.js';
 import { publicMessage, publicUser } from './presentation.js';
@@ -16,26 +18,23 @@ chat.post('/conversation', wrap(async (req, res) => {
 }));
 export async function conversationView(c, user) {
   const customer = await User.findById(c.customerId);
+  const pref = await preferenceFor(c, user);
   const readAt = user.role === 'admin' ? c.adminReadAt : c.customerReadAt;
-  const unread = await Message.countDocuments({ conversationId: c._id,
-    senderRole: user.role === 'admin' ? 'customer' : 'admin', createdAt: { $gt: readAt } });
-  return { id: String(c._id), status: c.status, preview: c.preview, lastMessageAt: c.lastMessageAt?.getTime() > 0 ? c.lastMessageAt : null,
+  const cutoff = pref.hiddenAt || new Date(0);
+  const visible = { conversationId: c._id, hiddenFor: { $ne: user._id }, createdAt: { $gt: cutoff } };
+  const unread = await Message.countDocuments({ ...visible, deletedForAllAt: null,
+    senderRole: user.role === 'admin' ? 'customer' : 'admin', createdAt: { $gt: new Date(Math.max(+readAt, +cutoff)) } });
+  const last = await Message.findOne(visible).sort({ _id: -1 }).select('text imageKey deletedForAllAt');
+  return { id: String(c._id), status: c.status, preview: last ? last.deletedForAllAt ? 'Message unsent' : last.text.slice(0, 100) || 'Photo' : '',
+    lastMessageAt: c.lastMessageAt?.getTime() > 0 ? c.lastMessageAt : null,
     customerReadAt: c.customerReadAt, adminReadAt: c.adminReadAt, unread,
-    customer: customer ? await publicUser(customer) : null };
+    pinnedAt: pref.pinnedAt || null, muted: !!pref.muted, customer: customer ? await publicUser(customer) : null };
 }
 chat.get('/conversations', wrap(async (req, res) => {
-  const query = req.user.role === 'admin' ? {} : { customerId: req.user._id };
-  // Sort by recent activity so older customers' new messages stay visible.
-  if (req.query.before) {
-    const [stamp, id] = String(req.query.before).split('_');
-    if (!/^\d{1,16}$/.test(stamp) || !Number.isFinite(new Date(Number(stamp)).getTime())) fail(400, 'Invalid inbox cursor.');
-    const date = new Date(Number(stamp));
-    query.$or = [{ lastMessageAt: { $lt: date } }, { lastMessageAt: date, _id: { $lt: objectId(id) } }];
-  }
-  const records = await Conversation.find(query).sort({ lastMessageAt: -1, _id: -1 }).limit(100);
+  const { records, next } = await inboxRecords(req.user, req.query);
   const conversations = await Promise.all(records.map(c => conversationView(c, req.user)));
-  conversations.sort((a, b) => new Date(b.lastMessageAt || 0) - new Date(a.lastMessageAt || 0));
-  res.json({ conversations, next: records.length === 100 ? `${records.at(-1).lastMessageAt.getTime()}_${records.at(-1)._id}` : null });
+  const muted = await Preference.find({ userId: req.user._id, muted: true }).select('conversationId');
+  res.json({ conversations, next, mutedConversationIds: muted.map(p => String(p.conversationId)) });
 }));
 chat.get('/conversations/:id', wrap(async (req, res) => {
   const c = await authorizeConversation(req.params.id, req.user);
@@ -43,16 +42,13 @@ chat.get('/conversations/:id', wrap(async (req, res) => {
 }));
 chat.get('/conversations/:id/messages', wrap(async (req, res) => {
   const conversation = await authorizeConversation(req.params.id, req.user);
-  const query = { conversationId: conversation._id };
-  if (req.query.before) query._id = { $lt: objectId(req.query.before) };
-  const records = await Message.find(query).sort({ _id: -1 }).limit(50).lean();
-  res.json({ messages: await Promise.all(records.reverse().map(publicMessage)),
-    hasMore: records.length === 50, conversation: await conversationView(conversation, req.user) });
+  const data = await loadHistory(conversation, req.user, req.query);
+  res.json({ ...data, conversation: await conversationView(conversation, req.user) });
 }));
 chat.get('/conversations/:id/messages/:messageId/photo', wrap(async (req, res) => {
   const c = await authorizeConversation(req.params.id, req.user);
   const message = await Message.findOne({ _id: objectId(req.params.messageId), conversationId: c._id });
-  if (!message?.imageKey) fail(404, 'Photo not found.');
+  if (!message?.imageKey || message.deletedForAllAt || message.hiddenFor?.some(id => String(id) === String(req.user._id)) || message.createdAt <= await historyCutoff(c, req.user)) fail(404, 'Photo not found.');
   res.json({ url: await photoUrl(message.imageKey) });
 }));
 chat.post('/conversations/:id/messages', rateLimit({ windowMs: 60000, limit: 60,
@@ -62,7 +58,7 @@ chat.post('/conversations/:id/messages', rateLimit({ windowMs: 60000, limit: 60,
   if (!/^[\w-]{8,100}$/.test(clientId)) fail(400, 'Invalid message reference.');
   const { message, inserted } = await persistMessage(c, req.user, { ...req.body, clientId });
   const payload = await publicMessage(message); const io = req.app.get('io');
-  io.to(`user:${c.customerId}`).to('admins').emit('chat:message', payload);
+  if (inserted) io.to(`user:${c.customerId}`).to('admins').emit('chat:message', payload);
   res.status(inserted ? 201 : 200).json({ message: payload });
 }));
 chat.post('/conversations/:id/read', wrap(async (req, res) => {

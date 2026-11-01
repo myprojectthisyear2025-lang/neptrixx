@@ -1,4 +1,5 @@
 /** Authenticated Socket.IO notifications/typing; messages are saved through the HTTP API. */
+import { trackPresence } from './presence.js';
 import { Server } from 'socket.io';
 import { accountFor } from './security.js';
 import { authorizeConversation } from './permissions.js';
@@ -16,7 +17,8 @@ export function attachRealtime(server, app, sessions, origins) {
   });
   io.on('connection', socket => {
     socket.join(`user:${socket.data.userId}`); socket.join(`session:${socket.request.sessionID}`);
-    if (socket.data.role === 'admin') socket.join('admins');
+    if (socket.data.role === 'admin') socket.join('admins'); else socket.join('customers');
+    trackPresence(socket, io);
     let lastTyping = 0;
     socket.on('typing', async (packet = {}) => {
       if (Date.now() - lastTyping < 600) return; lastTyping = Date.now();

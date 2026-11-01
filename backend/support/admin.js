@@ -30,6 +30,7 @@ admin.patch('/customers/:id', wrap(async (req, res) => {
     { $set: { blocked: req.body.blocked }, $inc: { sessionVersion: 1 } }, { new: true });
   if (!user) fail(404, 'Customer not found.');
   req.app.get('io').in(`user:${user._id}`).disconnectSockets(true);
+  req.app.get('io').to('admins').emit('chat:conversation', { customerId: String(user._id) });
   res.json({ customer: await publicUser(user) });
 }));
 admin.patch('/conversations/:id', wrap(async (req, res) => {

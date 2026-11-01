@@ -105,3 +105,47 @@ Source inventory relative to the existing Neptrixx main branch.
 ## Removed original files
 
 None. Generated frontend/dist files are left unchanged in Git; Vercel builds from frontend source.
+
+## Conversation interaction extension
+
+Compared with deployed main commit `15a2b19`; no existing source file is removed.
+
+- `backend/support/admin.js`
+- `backend/support/chat.js`
+- `backend/support/chatPersistence.js`
+- `backend/support/history.js`
+- `backend/support/inbox.js`
+- `backend/support/jobs.js`
+- `backend/support/messageActions.js`
+- `backend/support/models.js`
+- `backend/support/preferences.js`
+- `backend/support/presence.js`
+- `backend/support/presentation.js`
+- `backend/support/profile.js`
+- `backend/support/push.js`
+- `backend/support/realtime.js`
+- `backend/support/routes.js`
+- `backend/tests/interactions.test.js`
+- `docs/CHAT_INTERACTIONS.md`
+- `docs/DEPLOYMENT.md`
+- `docs/REUSE.md`
+- `docs/VALIDATION.md`
+- `frontend/.env.example`
+- `frontend/src/support/Inbox.jsx`
+- `frontend/src/support/InboxMenu.jsx`
+- `frontend/src/support/InboxRow.jsx`
+- `frontend/src/support/MessageActions.jsx`
+- `frontend/src/support/MessageBubble.jsx`
+- `frontend/src/support/MessageList.jsx`
+- `frontend/src/support/MessageSoundSettings.jsx`
+- `frontend/src/support/Presence.jsx`
+- `frontend/src/support/Profile.jsx`
+- `frontend/src/support/SupportContext.jsx`
+- `frontend/src/support/SupportRuntime.jsx`
+- `frontend/src/support/Thread.jsx`
+- `frontend/src/support/interactions.css`
+- `frontend/src/support/notifications.js`
+- `frontend/src/support/useLongPress.js`
+- `frontend/src/support/useMessageSound.js`
+- `frontend/src/support/useThread.js`
+- `docs/FILES_CHANGED.md`

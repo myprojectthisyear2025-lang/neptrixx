@@ -71,3 +71,9 @@ If deploying the module as a separate business/site, use a separate database/buc
 - Database/provider backups follow the retention settings you configure with those providers.
 - New code files have a brief header and stay under 200 lines. Existing unrelated website files are preserved;
   generated lockfiles and unchanged original styling are not hand-authored support modules.
+
+## Conversation interaction extension
+
+`messageActions.js`, `inbox.js`, `preferences.js`, and `presence.js` remain inside
+`backend/support/`. The new action/presence/sound UI remains inside `frontend/src/support/`.
+The same feature switch gates all new routes, sockets, and UI.

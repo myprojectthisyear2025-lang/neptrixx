@@ -17,6 +17,7 @@ export function validEndpoint(value) {
 export function configurePush() {
   webpush.setVapidDetails(process.env.WEB_PUSH_SUBJECT, process.env.WEB_PUSH_PUBLIC_KEY, process.env.WEB_PUSH_PRIVATE_KEY);
 }
+push.get('/push/config', (_req, res) => res.json({ publicKey: process.env.WEB_PUSH_PUBLIC_KEY }));
 push.post('/push', wrap(async (req, res) => {
   const { endpoint, keys } = req.body;
   if (typeof endpoint !== 'string' || endpoint.length > 3000 || !validEndpoint(endpoint) ||

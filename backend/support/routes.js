@@ -1,5 +1,8 @@
 /** Optional support route installation; not imported or mounted when SUPPORT_ENABLED=false. */
 import { rateLimit } from 'express-rate-limit';
+import { presence } from './presence.js';
+import { messageActions } from './messageActions.js';
+import { preferences } from './preferences.js';
 import { auth } from './auth.js';
 import { chat } from './chat.js';
 import { admin } from './admin.js';
@@ -14,6 +17,6 @@ export function installSupportRoutes(app, sessions, settings) {
     message: { message: 'Too many requests. Please try again shortly.' } }), sessions,
     (req, res, next) => { res.set('Cache-Control', 'no-store'); next(); }, csrf);
   app.use('/api/support/auth', auth);
-  app.use('/api/support', authenticated, chat, uploads, profile, emailChange, push);
-  app.use('/api/support/admin', admin);
+  app.use('/api/support', authenticated, presence, messageActions, chat, uploads, profile, emailChange, push);
+  app.use('/api/support/admin', admin, preferences);
 }

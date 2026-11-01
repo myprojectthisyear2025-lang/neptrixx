@@ -1,7 +1,7 @@
 /** Customer/admin profile settings and password-confirmed customer account deletion. */
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
-import { User, Asset, Conversation, Message, Subscription, Code, PushJob } from './models.js';
+import { User, Asset, Conversation, Message, Subscription, Code, PushJob, Preference } from './models.js';
 import { publicUser } from './presentation.js';
 import { removePhoto } from './storage.js';
 import { text, fail, wrap } from './errors.js';
@@ -38,6 +38,7 @@ profile.delete('/profile', wrap(async (req, res) => {
   await Message.deleteMany({ conversationId: { $in: ids } });
   await PushJob.deleteMany({ conversationId: { $in: ids } });
   await Conversation.deleteMany({ customerId: user._id });
+  await Preference.deleteMany({ $or: [{ userId: user._id }, { conversationId: { $in: ids } }] });
   await Subscription.deleteMany({ userId: user._id }); await Code.deleteMany({ email: user.email });
   await user.deleteOne(); req.app.get('io').in(`user:${user._id}`).disconnectSockets(true);
   await new Promise(resolve => req.session.destroy(resolve));
