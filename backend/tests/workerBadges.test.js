@@ -5,18 +5,19 @@ import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 const source = readFileSync(new URL('../../frontend/public/support-sw.js', import.meta.url), 'utf8');
 function worker(support = true) {
-  const events = {}, shown = [], badges = [], posted = [], closed = [];
+  const events = {}, shown = [], badges = [], posted = [], closed = [], lifecycle = [];
   const navigator = support ? { setAppBadge: async n => badges.push(n), clearAppBadge: async () => badges.push(0) } : {};
-  const self = { location: { origin: 'https://www.neptrixx.com' }, addEventListener: (name, fn) => { events[name] = fn; },
+  const self = { skipWaiting: async () => lifecycle.push('install'), location: { origin: 'https://www.neptrixx.com' }, addEventListener: (name, fn) => { events[name] = fn; },
     registration: { showNotification: async (...args) => shown.push(args), getNotifications: async () => [
       { tag: 'chat-example', close: () => closed.push('chat') }, { tag: 'unrelated', close: () => closed.push('unrelated') },
     ] } };
-  runInNewContext(source, { self, navigator, URL, clients: { matchAll: async () => [{ postMessage: data => posted.push(data) }] } });
-  return { events, shown, badges, posted, closed };
+  runInNewContext(source, { self, navigator, URL, clients: { claim: async () => lifecycle.push('activate'), matchAll: async () => [{ postMessage: data => posted.push(data) }] } });
+  return { events, shown, badges, posted, closed, lifecycle };
 }
 async function push(w, data) { let pending; w.events.push({ data: { json: () => data }, waitUntil: p => { pending = p; } }); await pending; }
 test('worker shows notifications and updates supported unread badges with safe same-origin navigation', async () => {
-  const w = worker(); await push(w, { unreadCount: 7, path: 'https://evil.example/login' });
+  const w = worker(); w.events.install(); let active; w.events.activate({ waitUntil: p => { active = p; } }); await active;
+  assert.deepEqual(w.lifecycle, ['install', 'activate']); await push(w, { unreadCount: 7, path: 'https://evil.example/login' });
   assert.deepEqual(w.badges, [7]); assert.equal(w.shown.length, 1); assert.equal(w.shown[0][1].data.path, '/messages'); assert.equal(w.posted[0].type, 'neptrixx:push');
   await push(w, { unreadCount: 0 }); assert.deepEqual(w.badges, [7, 0]);
   await push(w, { unreadCount: -1 }); assert.deepEqual(w.badges, [7, 0]);

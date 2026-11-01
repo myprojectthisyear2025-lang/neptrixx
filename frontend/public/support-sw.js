@@ -1,4 +1,6 @@
 /** Message notifications and supported app-icon badges; no private-page caching or offline interception. */
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', event => event.waitUntil(clients.claim()));
 function safePath(value) {
   try {
     const url = new URL(value, self.location.origin);
