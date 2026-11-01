@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { rateLimit } from 'express-rate-limit';
 import { registrationCard } from './registration.js';
 import { loadHistory } from './history.js';
-import { inboxRecords, preferenceFor, historyCutoff } from './inbox.js';
+import { inboxRecords, unreadTotal, preferenceFor, historyCutoff } from './inbox.js';
 import { Conversation, Message, User, Preference } from './models.js';
 import { authorizeConversation, ensureConversation, requireActiveCustomer } from './permissions.js';
 import { photoUrl } from './storage.js';
@@ -35,7 +35,7 @@ chat.get('/conversations', wrap(async (req, res) => {
   const { records, next } = await inboxRecords(req.user, req.query);
   const conversations = await Promise.all(records.map(c => conversationView(c, req.user)));
   const muted = await Preference.find({ userId: req.user._id, muted: true }).select('conversationId');
-  res.json({ conversations, next, mutedConversationIds: muted.map(p => String(p.conversationId)) });
+  res.json({ conversations, next, unreadTotal: await unreadTotal(req.user), mutedConversationIds: muted.map(p => String(p.conversationId)) });
 }));
 chat.get('/conversations/:id', wrap(async (req, res) => {
   const c = await authorizeConversation(req.params.id, req.user);

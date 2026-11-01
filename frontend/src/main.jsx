@@ -1,4 +1,5 @@
 // Mount the Neptrixx website and its shared brand presentation.
+import './features/installPrompt';
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";

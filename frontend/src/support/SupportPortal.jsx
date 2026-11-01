@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSupport } from './SupportContext';
 import { useTheme } from './useTheme';
 import { request } from './api';
+import InstallShortcut from './InstallShortcut';
 import NotificationBanner from './NotificationBanner';
 import AuthForm from './AuthForm';
 import Inbox from './Inbox';
@@ -57,6 +58,7 @@ export default function SupportPortal() {
             <><h1>{starting ? 'Opening your conversation…' : 'Talk to Neptrixx'}</h1>{!starting && <button className="sp-primary" onClick={start}>Open conversation</button>}</>}</div>}
       </main>
     </>}
+    <InstallShortcut />
     {profile && user && <Profile onClose={() => setProfile(false)} />}
   </div>;
 }
