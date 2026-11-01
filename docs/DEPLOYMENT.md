@@ -58,7 +58,7 @@ Never commit actual `.env` values. Enter variables in Render/Vercel, then deploy
 | Variable | Value |
 | --- | --- |
 | `VITE_API_BASE` | `https://api.neptrixx.com` |
-| `VITE_WEB_PUSH_PUBLIC_KEY` | The SAME public key saved as `WEB_PUSH_PUBLIC_KEY` in Render |
+| `VITE_WEB_PUSH_PUBLIC_KEY` | Legacy optional value; notification setup now fetches the server public key after login |
 
 Choose Config, not Secret, for these public values. Never put the private key, database URI, R2 credentials,
 session secret, or Resend key in a `VITE_` variable.
@@ -91,6 +91,8 @@ No Shell command, admin role selector, hardcoded admin password, or frontend sec
 Photos upload through the Render API, so browser-upload R2 CORS is unnecessary.
 The API validates image contents, strips metadata, resizes/converts to WebP, and stores private objects.
 Each input photo is limited to 8 MB and chat text to 4,000 characters. Signed viewing URLs expire after 15 minutes.
+Sender unsend removes the photo reference and attempts immediate R2 deletion; failed deletion is retried by abandoned-upload cleanup.
+Previously downloaded/cached copies cannot be recalled.
 The app can refresh expired URLs through authorized endpoints. Keep public `r2.dev` access disabled.
 
 Click Enable notifications on each device and accept the browser prompt.
@@ -98,6 +100,10 @@ On iPhone/iPad, use iOS/iPadOS 16.4+, Share → Add to Home Screen, then open th
 Choose one canonical website origin for installation. The service worker shows generic alerts and opens the relevant conversation.
 It does not cache website pages. Logout removes this device's subscription; account settings can disable notifications.
 Denied permissions, Focus/Do Not Disturb, offline/force-stopped devices, browser restrictions, and service sleep affect delivery.
+Brave may require Settings → Privacy and security → Use Google services for push messaging, then a browser restart.
+Notification setup repairs an existing subscription when the server public key changes.
+The website cannot enable a browser push service or override denied permissions or device sound settings.
+A soft in-page tone is available for focused website sessions after interaction, with a per-device toggle and test button.
 Queued retries use backoff up to eight attempts. Old jobs over one hour are skipped after a long disabled period.
 Notifications already dispatched can still arrive after disabling. Email unread reminders and admin two-factor auth are not included.
 

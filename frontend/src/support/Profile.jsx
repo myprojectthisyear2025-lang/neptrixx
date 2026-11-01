@@ -4,6 +4,7 @@ import { request } from './api';
 import { useSupport } from './SupportContext';
 import { uploadPhoto } from './upload';
 import { enableNotifications, disableNotifications } from './notifications';
+import MessageSoundSettings from './MessageSoundSettings';
 import Avatar from './Avatar';
 import Modal from './Modal';
 import EmailChange from './EmailChange';
@@ -51,6 +52,7 @@ export default function Profile({ onClose }) {
     <div className="sp-settings-section"><h3>Message notifications</h3><p className="sp-muted">Enable on each device you use. Your browser and phone settings control alerts.</p>
       <div className="sp-button-row"><button disabled={busy} onClick={() => notifications(true)}>Enable on this device</button><button disabled={busy} onClick={() => notifications(false)}>Disable notifications</button></div>
     </div>
+    <MessageSoundSettings />
     {error && <p className="sp-error" role="alert">{error}</p>}{notice && <p className="sp-notice" role="status">{notice}</p>}
     <div className="sp-settings-section"><button disabled={busy} onClick={() => logout().catch(e => setError(e.message))}>Log out to reset password</button><button className="sp-logout" disabled={busy} onClick={() => logout().catch(e => setError(e.message))}>Log out</button></div>
     {user.role === 'customer' && <div className="sp-settings-section">

@@ -1,0 +1,28 @@
+/* Presence, compact inbox controls, and touch/keyboard message actions in both themes. */
+.sp-presence { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--sp-muted); }
+.sp-presence i { display:block; width:8px; height:8px; border-radius:50%; background:#8b9099; flex:none; }
+.sp-presence.is-online i { background:#24a36c; }
+.sp-avatar-presence { position:relative; flex:none; }
+.sp-avatar-presence > .sp-presence { position:absolute; bottom:-1px; right:-2px; border:2px solid var(--sp-surface); border-radius:50%; }
+.sp-inbox-row { display:flex; align-items:stretch; border-bottom:1px solid var(--sp-border); }
+.sp-inbox-row .sp-inbox-item { flex:1; min-width:0; border-bottom:0; padding-right:4px; }
+.sp-inbox-row .sp-inbox-options { border:0; border-radius:0; background:transparent; padding:8px; width:30px; flex:none; }
+.sp-inbox-row.is-selected { background:var(--sp-raised); }
+.sp-inbox-row:hover { background:var(--sp-raised); }
+.sp-row-status { font-size:10px!important; margin-top:2px; }
+.sp-inbox-trailing time { white-space:nowrap; font-size:10px; }
+.sp-bubble { -webkit-touch-callout:none; touch-action:pan-y; }
+.sp-bubble .sp-image-button img { -webkit-user-drag:none; user-select:none; }
+.sp-action-menu { display:grid; gap:10px; }
+.sp-action-menu > button { text-align:left; padding:13px; }
+.sp-reaction-picker { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:8px; }
+.sp-reaction-picker button { font-size:24px; padding:6px; flex:1; }
+.sp-reaction-picker [aria-pressed="true"], .sp-reactions [aria-pressed="true"] { border-color:var(--sp-text); background:var(--sp-raised); }
+.sp-action-edit { display:grid; gap:14px; }.sp-action-edit label { display:grid; gap:8px; }
+.sp-action-edit textarea { width:100%; resize:vertical; }
+.sp-reactions { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+.sp-reactions button { font-size:12px; padding:3px 7px; border-radius:999px; }
+.sp-message.is-unsent .sp-bubble { background:transparent; border:1px dashed var(--sp-border); color:var(--sp-muted); }
+.sp-sound-settings { padding-top:20px; border-top:1px solid var(--sp-border); }
+.sp-sound-settings label { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.sp-app .sp-sound-settings input { width:auto; padding:0; accent-color:var(--sp-text); }.sp-sound-settings p { font-size:12px; line-height:1.6; margin-top:12px; }

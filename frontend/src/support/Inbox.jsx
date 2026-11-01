@@ -2,10 +2,12 @@
 import { useEffect, useState } from 'react';
 import { request } from './api';
 import { useSupport } from './SupportContext';
+import InboxRow from './InboxRow';
+import InboxMenu from './InboxMenu';
 import Avatar from './Avatar';
 export default function Inbox({ selected, onSelect }) {
-  const { conversations, refresh, nextInbox } = useSupport(); const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState('all'); const [customers, setCustomers] = useState(null);
+  const { conversations, refresh, nextInbox, inboxFilter, setInboxFilter } = useSupport(); const [query, setQuery] = useState('');
+  const [menu, setMenu] = useState(null); const [customers, setCustomers] = useState(null);
   const [nextCustomer, setNextCustomer] = useState(null); const [error, setError] = useState(''); const [busy, setBusy] = useState(false);
   useEffect(() => {
     if (!query.trim()) { setCustomers(null); setError(''); return; }
@@ -29,28 +31,24 @@ export default function Inbox({ selected, onSelect }) {
       else await refresh(true, nextInbox);
     } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
-  const visible = conversations.filter(c => filter === 'all' || filter === 'unread' ? filter === 'all' || c.unread > 0 : c.status === filter)
-    .sort((a, b) => new Date(b.lastMessageAt || 0) - new Date(a.lastMessageAt || 0));
+  const visible = [...conversations].sort((a, b) => Number(!!b.pinnedAt) - Number(!!a.pinnedAt) || new Date(b.lastMessageAt || 0) - new Date(a.lastMessageAt || 0));
   return <aside className="sp-inbox">
     <div className="sp-inbox-head"><h1>Messages</h1><p className="sp-muted">Your customer conversations</p>
       <label className="sp-search"><span className="sp-sr-only">Search customers</span><input type="search" value={query} placeholder="Search name, email, phone, ID"
         onChange={e => setQuery(e.target.value)} /></label>
       {!query.trim() && <div className="sp-filters">{['all', 'unread', 'open', 'resolved'].map(value => <button key={value}
-        className={filter === value ? 'is-active' : ''} onClick={() => setFilter(value)}>{value[0].toUpperCase() + value.slice(1)}</button>)}</div>}
+        className={inboxFilter === value ? 'is-active' : ''} onClick={() => setInboxFilter(value)}>{value[0].toUpperCase() + value.slice(1)}</button>)}</div>}
     </div>
     {error && <p className="sp-error" role="alert">{error}</p>}
     <div className="sp-inbox-list">
       {customers ? <>{customers.map(customer => <button className="sp-inbox-item" key={customer.id} disabled={busy} onClick={() => openCustomer(customer)}>
         <Avatar user={customer} /><span><strong>{customer.name}</strong><small>{customer.email}</small><small>{customer.blocked ? 'Restricted account' : 'Open conversation'}</small></span>
       </button>)}{!customers.length && <p className="sp-empty">No customers found.</p>}</> :
-        visible.map(c => <button key={c.id} className={`sp-inbox-item ${selected?.id === c.id ? 'is-selected' : ''}`} onClick={() => onSelect(c)}>
-          <Avatar user={c.customer} /><span><strong>{c.customer?.name || 'Customer'}</strong><small>{c.preview || 'Start a conversation'}</small></span>
-          <span className="sp-inbox-trailing">{c.lastMessageAt && <time>{new Date(c.lastMessageAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}</time>}
-            {c.unread > 0 && <b className="sp-count">{c.unread}</b>}{c.status === 'resolved' && <small>Resolved</small>}</span>
-        </button>)}
+        visible.map(c => <InboxRow key={c.id} conversation={c} selected={selected?.id === c.id} onSelect={onSelect} onMenu={setMenu} />)}
       {!customers && !visible.length && <p className="sp-empty">{conversations.length ? 'No conversations in this view.' : 'No messages yet. Search for a customer to start.'}</p>}
       {(customers ? nextCustomer : nextInbox) && <button className="sp-history" disabled={busy} onClick={more}>Load more</button>}
       {busy && <p className="sp-empty" role="status">Loading…</p>}
     </div>
+    {menu && <InboxMenu conversation={conversations.find(c => c.id === menu.id) || menu} onClose={() => setMenu(null)} onDeleted={id => { if (selected?.id === id) onSelect(null); }} />}
   </aside>;
 }

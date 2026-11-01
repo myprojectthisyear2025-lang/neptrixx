@@ -8,7 +8,7 @@ export const User = model('SupportUser', new Schema({
   phone: { type: String, default: '' }, passwordHash: { type: String, required: true, select: false },
   avatarKey: { type: String, default: '' }, role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
   blocked: { type: Boolean, default: false }, pushEnabled: { type: Boolean, default: true },
-  sessionVersion: { type: Number, default: 0 },
+  sessionVersion: { type: Number, default: 0 }, lastSeenAt: { type: Date, default: null },
 }, { timestamps: true }));
 export const Code = model('SupportCode', new Schema({
   email: { type: String, required: true }, purpose: { type: String, enum: ['signup', 'reset', 'email'] },
@@ -27,6 +27,9 @@ export const Message = model('SupportMessage', new Schema({
   senderId: { type: Schema.Types.ObjectId, required: true },
   senderRole: { type: String, enum: ['customer', 'admin'], required: true },
   clientId: { type: String, required: true }, text: { type: String, default: '' },
+  editedAt: { type: Date, default: null }, deletedForAllAt: { type: Date, default: null },
+  hiddenFor: [{ type: Schema.Types.ObjectId }], revision: { type: Number, default: 0 },
+  reactions: [{ _id: false, userId: { type: Schema.Types.ObjectId }, emoji: String }],
   imageKey: { type: String, default: '' }, replyTo: { type: Schema.Types.ObjectId, default: null },
 }, { timestamps: true }).index({ senderId: 1, clientId: 1 }, { unique: true })
   .index({ conversationId: 1, createdAt: -1, _id: -1 }));
@@ -50,3 +53,9 @@ export const Bootstrap = model('SupportBootstrap', new Schema({
   _id: { type: String, default: 'initial-admin' }, userId: { type: Schema.Types.ObjectId, required: true },
   reason: { type: String, enum: ['verified-owner', 'admin-exists'], required: true },
 }, { timestamps: true }));
+
+/** Per-admin inbox choices never change another admin or customer account's history. */
+export const Preference = model('SupportPreference', new Schema({
+  userId: { type: Schema.Types.ObjectId, required: true }, conversationId: { type: Schema.Types.ObjectId, required: true },
+  pinnedAt: { type: Date, default: null }, muted: { type: Boolean, default: false }, hiddenAt: { type: Date, default: null },
+}, { timestamps: true }).index({ userId: 1, conversationId: 1 }, { unique: true }));
