@@ -1,3 +1,4 @@
+// Neptrixx website navigation with supplied brand artwork.
 import { useEffect, useState } from "react";
 
 const links = [
@@ -43,7 +44,7 @@ export default function Header({ scrollToSection }) {
       <header className="topbar">
         <button className="brand" type="button" onClick={() => goTo("hero")} aria-label="Go to top">
           <span className="brand-mark">
-            <img src="/neptrixx-logo.png" alt="" />
+            <img src="/neptrixx-mark.svg" alt="" />
           </span>
           <span className="brand-copy">
             <span className="brand-text">Neptrixx</span>

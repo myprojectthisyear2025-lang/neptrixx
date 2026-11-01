@@ -1,3 +1,5 @@
+/** Existing company website plus an isolated, reusable support area. */
+import SupportFeature from "./features/SupportFeature";
 import { useMemo } from "react";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
@@ -9,7 +11,7 @@ import ContactSection from "./components/ContactSection";
 import Footer from "./components/Footer";
 import { useReveal } from "./hooks/useReveal";
 
-export default function App() {
+function CompanyWebsite({ launcher = null }) {
   const year = useMemo(() => new Date().getFullYear(), []);
   useReveal();
 
@@ -29,6 +31,11 @@ export default function App() {
         <ContactSection />
       </main>
       <Footer scrollToSection={scrollToSection} year={year} />
+      {launcher}
     </div>
   );
+}
+
+export default function App() {
+  return <SupportFeature renderWebsite={launcher => <CompanyWebsite launcher={launcher} />} />;
 }

@@ -1,3 +1,10 @@
-node_modules/ 
-frontend/node_modules/ 
-backend/node_modules/ 
+# Keep deployment secrets, dependencies, generated builds, and temporary files out of Git.
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+.env
+.env.*
+!.env.example
+frontend/dist/
+*.log
+.DS_Store

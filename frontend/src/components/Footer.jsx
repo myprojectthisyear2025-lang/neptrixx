@@ -1,3 +1,4 @@
+// Neptrixx website footer with supplied brand artwork.
 export default function Footer({ scrollToSection, year }) {
   const navItems = [
     ["services", "Services"],
@@ -10,7 +11,7 @@ export default function Footer({ scrollToSection, year }) {
     <footer className="footer">
       <div className="footer-brand-block">
         <div className="footer-brand-line">
-          <img src="/neptrixx-logo.png" alt="Neptrixx logo" />
+          <img src="/neptrixx-mark.svg" alt="Neptrixx logo" />
           <strong>Neptrixx</strong>
         </div>
         <p>Websites, apps, AI services, custom software, product design, and digital systems for clients worldwide.</p>

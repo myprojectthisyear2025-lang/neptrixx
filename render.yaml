@@ -1,0 +1,51 @@
+# Render Blueprint for the existing repository's backend; populate secret values in Render.
+services:
+  - type: web
+    name: neptrixx-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22
+      - key: SUPPORT_ENABLED
+        value: "true"
+      - key: CLIENT_ORIGIN
+        value: https://neptrixx.com,https://www.neptrixx.com
+      - key: MONGODB_DB_NAME
+        value: neptrixx
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: MONGODB_URI
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_REPLY_TO
+        value: support@neptrixx.com
+      - key: INQUIRY_FROM_EMAIL
+        sync: false
+      - key: INQUIRY_TO_EMAIL
+        value: neptrixxinternational@gmail.com
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: WEB_PUSH_PUBLIC_KEY
+        sync: false
+      - key: WEB_PUSH_PRIVATE_KEY
+        sync: false
+      - key: WEB_PUSH_SUBJECT
+        value: mailto:support@neptrixx.com
+      - key: INITIAL_ADMIN_EMAIL
+        sync: false
