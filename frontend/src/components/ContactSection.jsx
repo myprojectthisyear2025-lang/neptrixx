@@ -1,8 +1,10 @@
+/** Existing project inquiry form, using the configured hosted API address. */
+import { API_BASE } from "../config/api";
 import { useState } from "react";
 import SectionHeading from "./SectionHeading";
 import { inquiryServices } from "../data/siteData";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+
 
 const emptyForm = {
   name: "",
@@ -30,6 +32,7 @@ export default function ContactSection() {
     setResult({ type: "", text: "" });
 
     try {
+      if (!API_BASE) throw new Error("The contact service is not configured yet. Please email us directly.");
       const response = await fetch(`${API_BASE}/api/inquiries`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

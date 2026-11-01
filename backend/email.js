@@ -1,3 +1,4 @@
+/** Existing website inquiry email formatting and Resend delivery. */
 const RESEND_URL = "https://api.resend.com/emails";
 
 function escapeHtml(value = "") {

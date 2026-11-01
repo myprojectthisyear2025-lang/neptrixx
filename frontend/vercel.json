@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/messages", "destination": "/index.html" },
+    { "source": "/messages/", "destination": "/index.html" },
+    { "source": "/admin/messages", "destination": "/index.html" },
+    { "source": "/admin/messages/", "destination": "/index.html" }
+  ],
+  "headers": [
+    { "source": "/support-sw.js", "headers": [
+      { "key": "Cache-Control", "value": "no-cache" },
+      { "key": "Service-Worker-Allowed", "value": "/" }
+    ] },
+    { "source": "/messages", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
+    { "source": "/admin/messages", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] }
+  ]
+}

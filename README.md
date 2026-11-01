@@ -1,98 +1,34 @@
-# Neptrixx Website
+# Neptrixx with customer support chat
 
-Modern full-stack website for **https://www.neptrixx.com**.
+Complete updated website source based on the latest uploaded Neptrixx project, with support messaging
+adapted from the supplied RomBuzz backend and mobile chat UI.
 
-## Stack
+Read [START_HERE.md](START_HERE.md) first, then follow the [hosted deployment guide](docs/DEPLOYMENT.md).
+The complete credential checklist is in `backend/.env.example` and `frontend/.env.example`.
 
-- Frontend: React + Vite
-- Backend: Node.js + Express
-- Inquiry email delivery: Resend API
-- Responsive UI: mobile, tablet, laptop, desktop
+## Website
 
-## Included in this version
+The existing company homepage, services, products, process, contact form, SEO metadata, and public legal pages remain.
+A Chat with us button opens `/messages`; verified admin accounts use `/admin/messages`.
+New project inquiries persist in MongoDB and continue using the existing Resend email template.
 
-- Bright modern redesign with no dark content cards
-- Responsive layout and mobile hamburger navigation
-- Mobile menu closes when the user taps outside it or presses Escape
-- Desktop navigation scrolls away with the page instead of staying fixed
-- Animated product showcase
-- Yumi Beads added as a live Neptrixx product
-- Worldwide company positioning
-- Website Development and AI service options in the inquiry form
-- Inquiry emails delivered to `neptrixxinternational@gmail.com`
-- Spam honeypot and basic server-side rate limiting
-- Public inquiry-list endpoint removed
-- SEO title, description, canonical URL, Open Graph metadata, JSON-LD structured data
-- `robots.txt`, `sitemap.xml`, web manifest, and social preview image
+## Support features
 
-## Local development
+- Optional support controlled by one Render setting; disabling preserves the company site and stored chat data.
+- One-time admin enrollment after verification of your configured email; no paid Shell required.
+- Verified email signup, login, password reset, verified email changes, and secure browser sessions.
+- Full name, email, optional international phone number, and one optional profile picture.
+- Private customer–business text/photo conversations with saved history, replies, read status, and unread counts.
+- Searchable admin inbox, new conversations, Open/Resolved status, and customer access restrictions.
+- Private Cloudflare R2 photos, metadata stripping, upload limits, and temporary viewing URLs.
+- Web Push for customers/admins with supported browser/OS behavior and persistent delivery retries.
+- Account settings/deletion and responsive Light/Dark/System themes using Inter.
 
-### Backend
+## Deployment
 
-```bash
-cd backend
-npm install
-copy .env.example .env
-npm run dev
-```
+Frontend: React + Vite on Vercel. Backend: Node/Express + Socket.IO on Render.
+MongoDB stores accounts, messages, sessions, inquiries, and push jobs; Resend delivers verification/recovery emails.
+No local server setup is needed. Real credentials must be entered in the hosting dashboards before deployment.
+The source ZIP itself does not push changes to GitHub or deploy either service.
 
-Backend: `http://localhost:5000`
-
-### Frontend
-
-Open another terminal:
-
-```bash
-cd frontend
-npm install
-copy .env.example .env
-npm run dev
-```
-
-Frontend: `http://localhost:5173`
-
-## Required production environment variables
-
-### Frontend
-
-```env
-VITE_API_BASE=https://YOUR-BACKEND-DOMAIN
-```
-
-### Backend
-
-```env
-CLIENT_ORIGIN=https://www.neptrixx.com,https://neptrixx.com
-RESEND_API_KEY=re_your_api_key_here
-INQUIRY_FROM_EMAIL=Neptrixx Website <website@neptrixx.com>
-INQUIRY_TO_EMAIL=neptrixxinternational@gmail.com
-```
-
-For production email delivery, add and verify `neptrixx.com` in Resend and use a sender such as `website@neptrixx.com`.
-
-## SEO after deployment
-
-The code includes the on-site SEO pieces, but search engines control indexing and ranking. After deploying:
-
-1. Add `https://www.neptrixx.com` to Google Search Console.
-2. Verify the domain.
-3. Submit `https://www.neptrixx.com/sitemap.xml`.
-4. Use URL Inspection for the homepage and request indexing.
-5. Keep the site live, fast, useful, and linked from your products and business profiles.
-
-## Production checks
-
-Frontend build:
-
-```bash
-cd frontend
-npm run build
-```
-
-Backend syntax check:
-
-```bash
-cd backend
-node --check server.js
-node --check email.js
-```
+See [enable/disable and removal boundaries](docs/OPTIONAL_SUPPORT.md), [module reuse and source mapping](docs/REUSE.md) and [verification results](docs/VALIDATION.md).
