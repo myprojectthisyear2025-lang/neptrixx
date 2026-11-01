@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSupport } from './SupportContext';
 import { useTheme } from './useTheme';
 import { request } from './api';
-import { enableNotifications } from './notifications';
+import NotificationBanner from './NotificationBanner';
 import AuthForm from './AuthForm';
 import Inbox from './Inbox';
 import Thread from './Thread';
@@ -15,7 +15,7 @@ import './messages.css';
 export default function SupportPortal() {
   const { user, loading, error, setError, unread, logout } = useSupport(); const { theme, setTheme, mode } = useTheme();
   const [conversation, setConversation] = useState(null); const [profile, setProfile] = useState(false);
-  const [starting, setStarting] = useState(false); const [notice, setNotice] = useState('');
+  const [starting, setStarting] = useState(false);
   const isAdmin = user?.role === 'admin';
   async function start() {
     setStarting(true); setError('');
@@ -39,10 +39,6 @@ export default function SupportPortal() {
     setConversation(c);
     if (isAdmin) history.replaceState(null, '', c ? `/admin/messages?conversation=${c.id}` : '/admin/messages');
   }
-  async function notify() {
-    setError(''); setNotice('');
-    try { await enableNotifications(); setNotice('Notifications enabled on this device.'); } catch (e) { setError(e.message); }
-  }
   return <div className="sp-app" data-theme={mode}>
     <header className="sp-topbar"><a className="sp-brand" href="/"><img src="/neptrixx-mark.svg" alt="" /><span>Neptrixx<small>{isAdmin ? 'Customer inbox' : 'Support'}</small></span></a>
       <div className="sp-top-actions"><label className="sp-theme"><span className="sp-sr-only">Appearance</span><select value={theme} onChange={e => setTheme(e.target.value)}>
@@ -52,9 +48,8 @@ export default function SupportPortal() {
     {loading ? <p className="sp-empty" role="status">Loading your account…</p> : !user ? <>
       {error && <p className="sp-error sp-global-error" role="alert">{error}</p>}<AuthForm />
     </> : <>
-      <div className="sp-notification-bar"><span>Keep up with replies, even when you leave this page.</span><button onClick={notify}>Enable notifications</button></div>
+      <NotificationBanner />
       {error && <p className="sp-error sp-global-error" role="alert">{error} <button onClick={() => logout().catch(e => setError(e.message))}>Log out</button></p>}
-      {notice && <p className="sp-notice sp-global-error" role="status">{notice}</p>}
       <main className={`sp-workspace ${isAdmin ? 'sp-admin' : 'sp-customer'} ${conversation ? 'has-thread' : ''}`}>
         {isAdmin && <Inbox selected={conversation} onSelect={selectConversation} />}
         {conversation ? <Thread key={conversation.id} conversation={conversation} setConversation={setConversation} onBack={() => selectConversation(null)} /> :

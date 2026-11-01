@@ -3,7 +3,7 @@ import { before, after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import bcrypt from 'bcryptjs';
-import { setup, Client } from './helpers.js';
+import { setup, Client, testPhoto } from './helpers.js';
 import { createApp, finalizeApp } from '../app.js';
 import { config } from '../config.js';
 import { User, Message, Bootstrap, Conversation, Subscription } from '../support/models.js';
@@ -20,7 +20,7 @@ before(async () => {
 after(async () => { global.fetch = originalFetch; if (runtime) await runtime.close(); });
 async function pending(client, address) {
   await client.initialize();
-  const response = await client.call('post', '/auth/signup', { email: address, name: 'Verified Owner', password, role: 'admin' });
+  const response = await client.call('post', '/auth/signup', { email: address, name: 'Verified Owner', password, role: 'admin' }, {}, testPhoto);
   assert.equal(response.status, 200); return { email: address, code: mail.get(address) };
 }
 test('support defaults off and does not require support secrets when disabled', () => {
@@ -69,7 +69,7 @@ test('changing INITIAL_ADMIN_EMAIL or demoting an account cannot re-open enrollm
 });
 test('feature-off website contact requests still work and preserve support data', async () => {
   const user = await User.findOne({ email: 'customer@example.com' });
-  const c = await Conversation.create({ customerId: user._id });
+  const c = await Conversation.findOneAndUpdate({ customerId: user._id }, { $setOnInsert: { customerId: user._id } }, { new: true, upsert: true });
   await Message.create({ conversationId: c._id, senderId: user._id, senderRole: 'customer', clientId: 'preserve-message', text: 'Keep this' });
   await Subscription.create({ userId: user._id, endpoint: 'https://fcm.googleapis.com/preserve', keys: { p256dh: 'x', auth: 'x' } });
   const before = { users: await User.countDocuments(), messages: await Message.countDocuments(), subscriptions: await Subscription.countDocuments() };

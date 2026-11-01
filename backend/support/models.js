@@ -1,11 +1,14 @@
 /** Support-only MongoDB models; no dating relationships or embedded message arrays. */
 import mongoose from 'mongoose';
 const { Schema } = mongoose;
+const snapshotSchema = new Schema({ name: String, email: String, phone: String, photoKey: String,
+  capturedAt: Date, source: { type: String, enum: ['signup', 'existing'] } }, { _id: false });
 const model = (name, schema) => mongoose.models[name] || mongoose.model(name, schema);
 export const User = model('SupportUser', new Schema({
   name: { type: String, required: true }, email: { type: String, unique: true, required: true },
   emailVerifiedAt: { type: Date, default: null },
   phone: { type: String, default: '' }, passwordHash: { type: String, required: true, select: false },
+  signupSnapshot: { type: snapshotSchema, immutable: true, select: false },
   avatarKey: { type: String, default: '' }, role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
   blocked: { type: Boolean, default: false }, pushEnabled: { type: Boolean, default: true },
   sessionVersion: { type: Number, default: 0 }, lastSeenAt: { type: Date, default: null },
@@ -13,11 +16,12 @@ export const User = model('SupportUser', new Schema({
 export const Code = model('SupportCode', new Schema({
   email: { type: String, required: true }, purpose: { type: String, enum: ['signup', 'reset', 'email'] },
   hash: String, expiresAt: Date, sentAt: Date, attempts: { type: Number, default: 0 },
-  pending: { name: String, phone: String, passwordHash: String, userId: String },
+  pending: { name: String, phone: String, passwordHash: String, userId: String, avatarKey: String },
 }).index({ email: 1, purpose: 1 }, { unique: true }).index({ expiresAt: 1 }, { expireAfterSeconds: 0 }));
 export const Conversation = model('SupportConversation', new Schema({
   customerId: { type: Schema.Types.ObjectId, ref: 'SupportUser', unique: true, required: true },
   status: { type: String, enum: ['open', 'resolved'], default: 'open' },
+  profileCardAt: { type: Date, default: null },
   preview: { type: String, default: '' }, lastMessageAt: { type: Date, default: () => new Date(0) },
   customerReadAt: { type: Date, default: () => new Date(0) },
   adminReadAt: { type: Date, default: () => new Date(0) },

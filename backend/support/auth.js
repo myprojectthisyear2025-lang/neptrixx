@@ -3,6 +3,8 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { rateLimit } from 'express-rate-limit';
 import { User } from './models.js';
+import { signup } from './signup.js';
+import { announceCustomer } from './registration.js';
 import { issueCode, consumeCode } from './codes.js';
 import { authenticated, csrfToken, establish, accountFor } from './security.js';
 import { emailOf, validEmail, validPassword, text, fail, wrap } from './errors.js';
@@ -16,22 +18,7 @@ auth.get('/session', wrap(async (req, res) => {
 }));
 auth.use(rateLimit({ windowMs: 15 * 60000, limit: 25, standardHeaders: 'draft-7', legacyHeaders: false,
   message: { message: 'Too many attempts. Try again in 15 minutes.' } }));
-auth.post('/signup', wrap(async (req, res) => {
-  const email = emailOf(req.body.email); validEmail(email); validPassword(req.body.password);
-  const name = text(req.body.name, 100); const phone = text(req.body.phone, 25);
-  if (name.length < 2) fail(400, 'Enter your full name.');
-  if (phone && !/^\+[1-9]\d{6,14}$/.test(phone)) fail(400, 'Use an international phone number, such as +9779800000000.');
-  if (await User.exists({ email })) fail(409, 'An account already exists. Log in or reset your password.');
-  await issueCode(email, 'signup', { name, phone, passwordHash: await bcrypt.hash(req.body.password, 12) });
-  res.json({ message: 'Check your email for a verification code.' });
-}));
-auth.post('/verify', wrap(async (req, res) => {
-  const email = emailOf(req.body.email); validEmail(email);
-  const pending = await consumeCode(email, 'signup', req.body.code);
-  const created = await User.create({ email, ...(pending.toObject?.() || pending), emailVerifiedAt: new Date() });
-  const user = await bootstrapAdmin(created, req.app.get('initialAdminEmail'));
-  await establish(req, user); res.status(201).json({ user: await publicUser(user), csrf: csrfToken(req) });
-}));
+auth.use(signup);
 auth.post('/login', wrap(async (req, res) => {
   const email = emailOf(req.body.email);
   let user = await User.findOne({ email }).select('+passwordHash');
@@ -41,6 +28,7 @@ auth.post('/login', wrap(async (req, res) => {
   const previousVersion = user.sessionVersion;
   user = await bootstrapAdmin(user, req.app.get('initialAdminEmail'));
   if (user.sessionVersion !== previousVersion) req.app.get('io').in(`user:${user._id}`).disconnectSockets(true);
+  await announceCustomer(user, req.app.get('io'));
   await establish(req, user); res.json({ user: await publicUser(user), csrf: csrfToken(req) });
 }));
 auth.post('/forgot', wrap(async (req, res) => {

@@ -40,6 +40,7 @@ async function enable() {
     subscription ||= await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
     await request('/push', { method: 'POST', body: subscription.toJSON() });
     await request('/profile', { method: 'PATCH', body: { pushEnabled: true } });
+    window.dispatchEvent(new Event('neptrixx:notifications-changed'));
   } catch (e) { throw await pushFailure(e); }
 }
 export async function disableNotifications() {
@@ -50,4 +51,5 @@ export async function disableNotifications() {
     await request('/push', { method: 'DELETE', body: { endpoint: subscription.endpoint } });
     await subscription.unsubscribe();
   }
+  window.dispatchEvent(new Event('neptrixx:notifications-changed'));
 }

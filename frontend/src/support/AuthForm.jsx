@@ -1,19 +1,25 @@
 /** Focused login/signup and six-digit email verification/reset; no dating onboarding. */
 import { useState } from 'react';
+import SignupPhoto from './SignupPhoto';
 import { request } from './api';
 import { useSupport } from './SupportContext';
 export default function AuthForm() {
   const { setUser, setError: clearGlobalError } = useSupport(); const [mode, setMode] = useState('login');
   const [fields, setFields] = useState({ name: '', email: '', phone: '', password: '', code: '' });
   const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [notice, setNotice] = useState('');
-  const [resendAt, setResendAt] = useState(0);
+  const [resendAt, setResendAt] = useState(0); const [photo, setPhoto] = useState(null);
   const change = e => setFields(f => ({ ...f, [e.target.name]: e.target.value }));
   function switchMode(value) { setMode(value); setError(''); setNotice(''); setFields(f => ({ ...f, password: '', code: '' })); }
   async function submit(e) {
     e.preventDefault(); setBusy(true); setError(''); setNotice('');
     try {
       const path = { login: 'login', signup: 'signup', verify: 'verify', forgot: 'forgot', reset: 'reset' }[mode];
-      const data = await request(`/auth/${path}`, { method: 'POST', body: fields });
+      let body = fields;
+      if (mode === 'signup') {
+        if (!photo) throw new Error('Add one profile photo to create your account.');
+        body = new FormData(); Object.entries(fields).forEach(([key, value]) => body.append(key, value)); body.append('photo', photo);
+      }
+      const data = await request(`/auth/${path}`, { method: 'POST', body });
       if (data.user) { clearGlobalError(''); setUser(data.user); setFields(f => ({ ...f, password: '', code: '' })); }
       else if (mode === 'signup') { setMode('verify'); setResendAt(Date.now() + 60000); setNotice(data.message); }
       else if (mode === 'forgot') { setMode('reset'); setResendAt(Date.now() + 60000); setNotice(data.message); }
@@ -24,7 +30,7 @@ export default function AuthForm() {
     if (Date.now() < resendAt) { setNotice('Please wait one minute between code requests.'); return; }
     setBusy(true); setError('');
     try {
-      const data = await request(`/auth/${mode === 'verify' ? 'signup' : 'forgot'}`, { method: 'POST', body: fields });
+      const data = await request(`/auth/${mode === 'verify' ? 'resend-signup' : 'forgot'}`, { method: 'POST', body: fields });
       setNotice(data.message); setResendAt(Date.now() + 60000);
     } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
@@ -44,7 +50,8 @@ export default function AuthForm() {
         value={fields.password} onChange={change} />{mode !== 'login' && <small>At least 12 characters.</small>}</label>}
       {['verify', 'reset'].includes(mode) && <label>Email code<input name="code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6}
         autoComplete="one-time-code" required value={fields.code} onChange={change} /></label>}
-      {mode === 'signup' && <small>By creating an account, you agree to our <a href="/terms-of-service.html" target="_blank" rel="noreferrer">Terms</a> and <a href="/privacy-policy.html" target="_blank" rel="noreferrer">Privacy Policy</a>. You can add a profile photo after signup.</small>}
+      {mode === 'signup' && <SignupPhoto file={photo} onChange={setPhoto} onError={setError} />}
+      {mode === 'signup' && <small>By creating an account, you agree to our <a href="/terms-of-service.html" target="_blank" rel="noreferrer">Terms</a> and <a href="/privacy-policy.html" target="_blank" rel="noreferrer">Privacy Policy</a>. Our support team retains your signup details and original photo in your account history.</small>}
       {error && <p className="sp-error" role="alert">{error}</p>}{notice && <p className="sp-notice" role="status">{notice}</p>}
       <button className="sp-primary" disabled={busy}>{busy ? 'Please wait…' : { login: 'Log in', signup: 'Create account', verify: 'Verify email', forgot: 'Send reset code', reset: 'Reset password' }[mode]}</button>
     </form>

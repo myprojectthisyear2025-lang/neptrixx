@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { User, Asset, Conversation, Message, Subscription, Code, PushJob, Preference } from './models.js';
+import { ensureSnapshot } from './registration.js';
 import { publicUser } from './presentation.js';
 import { removePhoto } from './storage.js';
 import { text, fail, wrap } from './errors.js';
@@ -19,9 +20,10 @@ profile.patch('/profile', wrap(async (req, res) => {
     if (key && !await Asset.exists({ key, ownerId: req.user._id, purpose: 'avatar' })) fail(403, 'Profile photo not found.');
     changes.avatarKey = key;
   }
+  await ensureSnapshot(req.user._id);
   const old = req.user.avatarKey;
   Object.assign(req.user, changes); await req.user.save();
-  if (changes.avatarKey !== undefined && old && old !== changes.avatarKey) {
+  if (changes.avatarKey !== undefined && old && old !== changes.avatarKey && !await User.exists({ 'signupSnapshot.photoKey': old })) {
     await removePhoto(old).then(() => Asset.deleteOne({ key: old })).catch(() => console.warn('Old avatar cleanup will retry.'));
   }
   res.json({ user: await publicUser(req.user) });

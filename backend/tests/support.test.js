@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import bcrypt from 'bcryptjs';
 import { io as connect } from 'socket.io-client';
 import { randomUUID } from 'node:crypto';
-import { setup, Client } from './helpers.js';
+import { setup, Client, testPhoto } from './helpers.js';
 import { User, Code, Message, PushJob, Asset, Subscription, Conversation } from '../support/models.js';
 import webpush from 'web-push';
 import { processJobs } from '../support/jobs.js';
@@ -21,7 +21,7 @@ after(async () => { global.fetch = originalFetch; if (env) await env.close(); })
 const password = 'A long test password 123!';
 async function signup(client, email, name) {
   await client.initialize();
-  assert.equal((await client.call('post', '/auth/signup', { email, name, password, phone: '+9779800000000', role: 'admin' })).status, 200);
+  assert.equal((await client.call('post', '/auth/signup', { email, name, password, phone: '+9779800000000', role: 'admin' }, {}, testPhoto)).status, 200);
   return client.call('post', '/auth/verify', { email, code: mail.get(email) });
 }
 test('signup verifies email, excludes admin role injection, hashes password, and rotates session', async () => {
@@ -34,8 +34,8 @@ test('signup verifies email, excludes admin role injection, hashes password, and
 test('verification code is single-use and signup resend is throttled', async () => {
   await bob.initialize();
   const data = { name: 'Bob Customer', email: 'bob@example.com', password };
-  assert.equal((await bob.call('post', '/auth/signup', data)).status, 200);
-  assert.equal((await bob.call('post', '/auth/signup', data)).status, 429);
+  assert.equal((await bob.call('post', '/auth/signup', data, {}, testPhoto)).status, 200);
+  assert.equal((await bob.call('post', '/auth/signup', data, {}, testPhoto)).status, 429);
   assert.equal((await bob.call('post', '/auth/verify', { email: data.email, code: mail.get(data.email) })).status, 201);
   assert.equal((await bob.call('post', '/auth/verify', { email: data.email, code: mail.get(data.email) })).status, 400);
 });

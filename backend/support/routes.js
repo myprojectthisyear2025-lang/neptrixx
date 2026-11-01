@@ -1,5 +1,6 @@
 /** Optional support route installation; not imported or mounted when SUPPORT_ENABLED=false. */
 import { rateLimit } from 'express-rate-limit';
+import { registration } from './registration.js';
 import { presence } from './presence.js';
 import { messageActions } from './messageActions.js';
 import { preferences } from './preferences.js';
@@ -18,5 +19,5 @@ export function installSupportRoutes(app, sessions, settings) {
     (req, res, next) => { res.set('Cache-Control', 'no-store'); next(); }, csrf);
   app.use('/api/support/auth', auth);
   app.use('/api/support', authenticated, presence, messageActions, chat, uploads, profile, emailChange, push);
-  app.use('/api/support/admin', admin, preferences);
+  app.use('/api/support/admin', admin, preferences, registration);
 }

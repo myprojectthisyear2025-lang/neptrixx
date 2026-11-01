@@ -17,6 +17,10 @@ export function validEndpoint(value) {
 export function configurePush() {
   webpush.setVapidDetails(process.env.WEB_PUSH_SUBJECT, process.env.WEB_PUSH_PUBLIC_KEY, process.env.WEB_PUSH_PRIVATE_KEY);
 }
+push.post('/push/status', wrap(async (req, res) => {
+  const exists = typeof req.body.endpoint === 'string' && await Subscription.exists({ userId: req.user._id, endpoint: req.body.endpoint });
+  res.json({ enabled: req.user.pushEnabled && !!exists, publicKey: process.env.WEB_PUSH_PUBLIC_KEY });
+}));
 push.get('/push/config', (_req, res) => res.json({ publicKey: process.env.WEB_PUSH_PUBLIC_KEY }));
 push.post('/push', wrap(async (req, res) => {
   const { endpoint, keys } = req.body;

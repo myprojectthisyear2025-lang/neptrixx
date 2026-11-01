@@ -12,7 +12,7 @@ function merge(previous, incoming) {
 }
 export function useThread(conversation, onConversation) {
   const { user, socket, refresh } = useSupport(); const id = conversation?.id;
-  const [messages, setMessages] = useState([]); const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState([]); const [profileCard, setProfileCard] = useState(null); const [loading, setLoading] = useState(false);
   const [error, setError] = useState(''); const [hasMore, setHasMore] = useState(false);
   const [typing, setTyping] = useState(false); const active = useRef(id); active.current = id;
   const synced = useRef(null); const hidden = useRef(new Set()); const typingTimer = useRef(null); const list = useRef(messages); list.current = messages;
@@ -31,6 +31,7 @@ export function useThread(conversation, onConversation) {
       if (first && synced.current) { params.set('loadedFrom', first.id); params.set('changedSince', synced.current); }
       const data = await request(`/conversations/${id}/messages?${params}`);
       if (active.current !== id) return;
+      setProfileCard(user.role === 'admin' ? data.profileCard || null : null);
       for (const removed of data.hiddenIds || []) hidden.current.add(removed);
       synced.current = data.syncAt || synced.current;
       setMessages(p => merge(p.filter(m => !hidden.current.has(m.id) && (!data.hiddenBefore || new Date(m.createdAt) > new Date(data.hiddenBefore)) &&
@@ -43,7 +44,7 @@ export function useThread(conversation, onConversation) {
     finally { if (active.current === id) setLoading(false); }
   }, [id, markRead]);
   useEffect(() => {
-    setMessages([]); hidden.current.clear(); synced.current = null; list.current = []; setHasMore(false); setTyping(false); load();
+    setMessages([]); setProfileCard(null); hidden.current.clear(); synced.current = null; list.current = []; setHasMore(false); setTyping(false); load();
     return () => clearTimeout(typingTimer.current);
   }, [id, load]);
   useEffect(() => {
@@ -92,5 +93,5 @@ export function useThread(conversation, onConversation) {
     else setMessages(p => merge(p, [data.message]));
     refresh().catch(() => {});
   }
-  return { action, messages, loading, error, hasMore, typing, load, send };
+  return { profileCard, action, messages, loading, error, hasMore, typing, load, send };
 }

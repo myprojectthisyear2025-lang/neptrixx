@@ -29,6 +29,7 @@ admin.patch('/customers/:id', wrap(async (req, res) => {
   const user = await User.findOneAndUpdate({ _id: objectId(req.params.id), role: 'customer' },
     { $set: { blocked: req.body.blocked }, $inc: { sessionVersion: 1 } }, { new: true });
   if (!user) fail(404, 'Customer not found.');
+  await ensureConversation(user._id);
   req.app.get('io').in(`user:${user._id}`).disconnectSockets(true);
   req.app.get('io').to('admins').emit('chat:conversation', { customerId: String(user._id) });
   res.json({ customer: await publicUser(user) });

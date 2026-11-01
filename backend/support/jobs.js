@@ -41,7 +41,7 @@ export async function processJobs() {
 export async function cleanupUploads() {
   const assets = await Asset.find({ messageId: null, createdAt: { $lt: new Date(Date.now() - 86400000) } }).limit(100);
   for (const asset of assets) {
-    if (await User.exists({ avatarKey: asset.key }) || await Message.exists({ imageKey: asset.key })) continue;
+    if (await User.exists({ $or: [{ avatarKey: asset.key }, { 'signupSnapshot.photoKey': asset.key }] }) || await Message.exists({ imageKey: asset.key })) continue;
     await removePhoto(asset.key); await asset.deleteOne();
   }
 }

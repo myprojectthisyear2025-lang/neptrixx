@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { rateLimit } from 'express-rate-limit';
+import { registrationCard } from './registration.js';
 import { loadHistory } from './history.js';
 import { inboxRecords, preferenceFor, historyCutoff } from './inbox.js';
 import { Conversation, Message, User, Preference } from './models.js';
@@ -25,7 +26,7 @@ export async function conversationView(c, user) {
   const unread = await Message.countDocuments({ ...visible, deletedForAllAt: null,
     senderRole: user.role === 'admin' ? 'customer' : 'admin', createdAt: { $gt: new Date(Math.max(+readAt, +cutoff)) } });
   const last = await Message.findOne(visible).sort({ _id: -1 }).select('text imageKey deletedForAllAt');
-  return { id: String(c._id), status: c.status, preview: last ? last.deletedForAllAt ? 'Message unsent' : last.text.slice(0, 100) || 'Photo' : '',
+  return { id: String(c._id), status: c.status, preview: last ? last.deletedForAllAt ? 'Message unsent' : last.text.slice(0, 100) || 'Photo' : c.profileCardAt ? 'Customer profile' : '',
     lastMessageAt: c.lastMessageAt?.getTime() > 0 ? c.lastMessageAt : null,
     customerReadAt: c.customerReadAt, adminReadAt: c.adminReadAt, unread,
     pinnedAt: pref.pinnedAt || null, muted: !!pref.muted, customer: customer ? await publicUser(customer) : null };
@@ -43,7 +44,7 @@ chat.get('/conversations/:id', wrap(async (req, res) => {
 chat.get('/conversations/:id/messages', wrap(async (req, res) => {
   const conversation = await authorizeConversation(req.params.id, req.user);
   const data = await loadHistory(conversation, req.user, req.query);
-  res.json({ ...data, conversation: await conversationView(conversation, req.user) });
+  res.json({ ...data, ...(req.user.role === 'admin' ? { profileCard: await registrationCard(conversation.customerId) } : {}), conversation: await conversationView(conversation, req.user) });
 }));
 chat.get('/conversations/:id/messages/:messageId/photo', wrap(async (req, res) => {
   const c = await authorizeConversation(req.params.id, req.user);
