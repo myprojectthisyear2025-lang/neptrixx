@@ -2,7 +2,7 @@
 import mongoose from 'mongoose';
 import { Conversation, Message, Preference, User } from './models.js';
 import { fail } from './errors.js';
-export async function inboxRecords(user, options) {
+function inboxStages(user, options = {}) {
   const userId = user._id;
   const stages = [
     { $match: user.role === 'admin' ? {} : { customerId: userId } },
@@ -25,6 +25,14 @@ export async function inboxRecords(user, options) {
     ], as: 'unreadRows' } },
     { $set: { unread: { $ifNull: [{ $arrayElemAt: ['$unreadRows.count', 0] }, 0] } } },
   ];
+  return stages;
+}
+export async function unreadTotal(user) {
+  const rows = await Conversation.aggregate([...inboxStages(user), { $group: { _id: null, count: { $sum: '$unread' } } }]);
+  return rows[0]?.count || 0;
+}
+export async function inboxRecords(user, options) {
+  const stages = inboxStages(user, options);
   if (options.filter === 'muted') stages.push({ $match: { 'preference.muted': true } });
   else if (options.filter === 'pinned') stages.push({ $match: { pinTime: { $gt: new Date(0) } } });
   else if (options.filter === 'blocked') stages.push({ $match: { 'customerRecord.blocked': true } });

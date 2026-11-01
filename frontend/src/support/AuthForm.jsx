@@ -4,7 +4,7 @@ import SignupPhoto from './SignupPhoto';
 import { request } from './api';
 import { useSupport } from './SupportContext';
 export default function AuthForm() {
-  const { setUser, setError: clearGlobalError } = useSupport(); const [mode, setMode] = useState('login');
+  const { setUser, install, setError: clearGlobalError } = useSupport(); const [mode, setMode] = useState('login');
   const [fields, setFields] = useState({ name: '', email: '', phone: '', password: '', code: '' });
   const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [notice, setNotice] = useState('');
   const [resendAt, setResendAt] = useState(0); const [photo, setPhoto] = useState(null);
@@ -20,7 +20,7 @@ export default function AuthForm() {
         body = new FormData(); Object.entries(fields).forEach(([key, value]) => body.append(key, value)); body.append('photo', photo);
       }
       const data = await request(`/auth/${path}`, { method: 'POST', body });
-      if (data.user) { clearGlobalError(''); setUser(data.user); setFields(f => ({ ...f, password: '', code: '' })); }
+      if (data.user) { if (mode === 'verify') install.offerInstall(data.user.id); clearGlobalError(''); setUser(data.user); setFields(f => ({ ...f, password: '', code: '' })); }
       else if (mode === 'signup') { setMode('verify'); setResendAt(Date.now() + 60000); setNotice(data.message); }
       else if (mode === 'forgot') { setMode('reset'); setResendAt(Date.now() + 60000); setNotice(data.message); }
       else if (mode === 'reset') { setMode('login'); setFields(f => ({ ...f, password: '', code: '' })); setNotice(data.message); }

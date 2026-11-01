@@ -1,8 +1,8 @@
 {
   "name": "Neptrixx",
   "short_name": "Neptrixx",
-  "description": "Global software and product development company building websites, apps, AI solutions, custom software, and digital platforms.",
-  "start_url": "/",
+  "description": "Chat with Neptrixx support and keep track of replies.",
+  "start_url": "/messages",
   "display": "standalone",
   "background_color": "#f7f8fc",
   "theme_color": "#fff8f0",
@@ -19,6 +19,21 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "scope": "/",
+  "shortcuts": [
+    {
+      "name": "Messages",
+      "short_name": "Chat",
+      "url": "/messages",
+      "icons": [
+        {
+          "src": "/support-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

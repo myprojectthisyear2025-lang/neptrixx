@@ -1,5 +1,6 @@
 /** Mongo-backed push retries and cleanup of abandoned uploads; call from one Render service. */
 import { PushJob, Subscription, User, Conversation, Message, Asset, Preference } from './models.js';
+import { unreadTotal } from './inbox.js';
 import { deliver } from './push.js';
 import { removePhoto } from './storage.js';
 let busy = false;
@@ -16,14 +17,16 @@ export async function processJobs() {
         const message = await Message.findById(job.messageId);
         if (c && message && !message.deletedForAllAt) {
           const recipients = await User.find({ ...(job.senderRole === 'admin' ? { _id: c.customerId } : { role: 'admin' }),
-            blocked: false, pushEnabled: true }).select('_id');
+            blocked: false, pushEnabled: true }).select('_id role');
           const readAt = job.senderRole === 'admin' ? c.customerReadAt : c.adminReadAt;
           if (message.createdAt > readAt && Date.now() - message.createdAt.getTime() < 3600000) {
             const muted = await Preference.find({ conversationId: c._id, $or: [{ muted: true },
               { hiddenAt: { $gte: message.createdAt } }] }).select('userId');
             const subscriptions = await Subscription.find({ userId: { $in: recipients.map(u => u._id), $nin: [...muted.map(p => p.userId), ...(message.hiddenFor || [])] } });
+            const counts = new Map(await Promise.all(recipients.filter(u => subscriptions.some(s => String(s.userId) === String(u._id)))
+              .map(async u => [String(u._id), await unreadTotal(u)])));
             const results = await Promise.allSettled(subscriptions.map(s => deliver(s, {
-              title: 'Neptrixx', body: 'You have a new message.', tag: `chat-${c._id}`,
+              title: 'Neptrixx', body: 'You have a new message.', unreadCount: counts.get(String(s.userId)), tag: `chat-${c._id}`,
               path: `${job.senderRole === 'admin' ? '/messages' : '/admin/messages'}?conversation=${c._id}`,
             })));
             if (results.some(r => r.status === 'rejected')) throw new Error('Push delivery incomplete');

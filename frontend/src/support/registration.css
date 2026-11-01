@@ -12,3 +12,7 @@
 .sp-customer-card dl { display:grid; gap:10px; margin-bottom:16px; }.sp-customer-card dl > div { display:grid; grid-template-columns:58px minmax(0,1fr); gap:8px; }
 .sp-customer-card dt { font-size:12px; color:var(--sp-muted); }.sp-customer-card dd { margin:0; font-size:13px; overflow-wrap:anywhere; }
 .sp-customer-card > p { font-size:11px; line-height:1.6; }.sp-filters { flex-wrap:wrap; }
+
+/* Install UI stays within the support app and uses the current theme. */
+.sp-install-content { display:grid; gap:16px; }.sp-install-content p { font-size:14px; line-height:1.6; }
+.sp-install-content > button { min-height:44px; }.sp-install-settings p { margin:10px 0; }

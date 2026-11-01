@@ -24,6 +24,7 @@ New project inquiries persist in MongoDB and continue using the existing Resend 
 - Notification prompts reflect this device’s actual subscription rather than asking again after setup.
 - Private Cloudflare R2 photos, metadata stripping, upload limits, and temporary viewing URLs.
 - Web Push for customers/admins with supported browser/OS behavior and persistent delivery retries.
+- Neptrixx home-screen shortcut with a signup install offer, manual install guidance, and supported unread badges.
 - Account settings/deletion and responsive Light/Dark/System themes using Inter.
 
 ## Deployment
